@@ -245,33 +245,10 @@
             transition: all 0.3s ease;
         }
 
-        .advanced-card::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple), var(--neon-pink));
-            border-radius: 20px;
-            opacity: 0;
-            z-index: -1;
-            transition: opacity 0.3s ease;
-        }
-
-        .advanced-card:hover::before {
-            opacity: 1;
-            animation: borderRotate 3s linear infinite;
-        }
-
         .advanced-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0, 255, 255, 0.3);
-        }
-
-        @keyframes borderRotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
         .card-header {
@@ -320,7 +297,7 @@
 
         .day-card:hover {
             border-color: var(--neon-blue);
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             transform: scale(1.05);
         }
 
@@ -368,7 +345,8 @@
 
         .exercise-container:hover {
             border-color: var(--neon-green);
-            box-shadow: 0 0 20px rgba(61, 255, 0, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: translateX(5px);
         }
 
         .exercise-header {
@@ -398,7 +376,7 @@
 
         .exercise-check:hover {
             transform: scale(1.1);
-            box-shadow: 0 0 20px var(--neon-green);
+            border-color: var(--neon-blue);
         }
 
         .exercise-check.checked {
@@ -528,7 +506,7 @@
         .meal-item:hover {
             transform: translateX(10px);
             border-color: var(--neon-blue);
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
         .meal-time {
@@ -588,7 +566,8 @@
 
         .supplement-card:hover {
             transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(131, 56, 236, 0.4);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border-color: var(--neon-purple);
         }
 
         .supplement-name {
@@ -744,7 +723,8 @@
 
         .stat-box:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            border-color: var(--neon-blue);
         }
 
         .stat-number {
@@ -852,7 +832,7 @@
 
         .ultra-btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(0, 255, 255, 0.4);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
         }
 
         .ultra-btn.success {
@@ -899,7 +879,7 @@
 
         .calendar-nav-btn:hover {
             transform: scale(1.1);
-            box-shadow: 0 0 30px var(--neon-purple);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
         .calendar-month {
@@ -947,7 +927,7 @@
         .calendar-day:hover {
             transform: scale(1.1);
             border-color: var(--neon-purple);
-            box-shadow: 0 0 20px var(--neon-purple);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
         .calendar-day.today {
@@ -1052,7 +1032,7 @@
         .notes-textarea:focus {
             outline: none;
             border-color: var(--neon-blue);
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
             background: rgba(255, 255, 255, 0.08);
         }
 
@@ -1577,6 +1557,20 @@
                             <p><strong>Frequenza:</strong> 2-3x/settimana</p>
                             <p style="margin-top: 10px;">↑ Heat-shock proteins, ↑ GH, ↑ Flusso sanguigno</p>
                         </div>
+                        <div style="margin-top: 20px; padding: 20px; background: rgba(0,0,0,0.3); border-radius: 10px;">
+                            <label style="display: block; margin-bottom: 10px; color: var(--neon-orange); font-weight: 600;">
+                                ⏱️ Tempo Effettivo Oggi:
+                            </label>
+                            <input type="number" id="saunaTime" class="recovery-time-input" placeholder="Minuti" min="0" max="60" 
+                                   style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); 
+                                          border-radius: 5px; color: white; font-size: 1.1rem; margin-bottom: 15px;"
+                                   onchange="saveRecoveryTime('sauna', this.value)">
+                            <label style="display: block; margin-bottom: 10px; color: var(--neon-green); font-weight: 600;">
+                                📝 Note Sessione:
+                            </label>
+                            <textarea class="notes-textarea" placeholder="Sensazioni, temperatura, benefici percepiti..." 
+                                      style="min-height: 80px;" onchange="saveRecoveryNote('sauna', this.value)"></textarea>
+                        </div>
                     </div>
                     
                     <div class="recovery-card">
@@ -1589,6 +1583,20 @@
                             <p><strong>Quando:</strong> Giorni rest mattina</p>
                             <p style="margin-top: 10px;">↑ NO release, ↑ Mobilità, Decongestione</p>
                         </div>
+                        <div style="margin-top: 20px; padding: 20px; background: rgba(0,0,0,0.3); border-radius: 10px;">
+                            <label style="display: block; margin-bottom: 10px; color: var(--neon-orange); font-weight: 600;">
+                                ⏱️ Tempo Effettivo Oggi:
+                            </label>
+                            <input type="number" id="steamTime" class="recovery-time-input" placeholder="Minuti" min="0" max="60"
+                                   style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); 
+                                          border-radius: 5px; color: white; font-size: 1.1rem; margin-bottom: 15px;"
+                                   onchange="saveRecoveryTime('steam', this.value)">
+                            <label style="display: block; margin-bottom: 10px; color: var(--neon-green); font-weight: 600;">
+                                📝 Note Sessione:
+                            </label>
+                            <textarea class="notes-textarea" placeholder="Sensazioni, temperatura, benefici percepiti..." 
+                                      style="min-height: 80px;" onchange="saveRecoveryNote('steam', this.value)"></textarea>
+                        </div>
                     </div>
                     
                     <div class="recovery-card">
@@ -1600,6 +1608,20 @@
                             <p><strong>Quando:</strong> ≥4h post-workout</p>
                             <p><strong>Frequenza:</strong> 2x/settimana</p>
                             <p style="margin-top: 10px;">↓ DOMS, ↑ Noradrenalina/Dopamina</p>
+                        </div>
+                        <div style="margin-top: 20px; padding: 20px; background: rgba(0,0,0,0.3); border-radius: 10px;">
+                            <label style="display: block; margin-bottom: 10px; color: var(--neon-orange); font-weight: 600;">
+                                ⏱️ Tempo Effettivo Oggi:
+                            </label>
+                            <input type="number" id="iceTime" class="recovery-time-input" placeholder="Minuti totali" min="0" max="30"
+                                   style="width: 100%; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); 
+                                          border-radius: 5px; color: white; font-size: 1.1rem; margin-bottom: 15px;"
+                                   onchange="saveRecoveryTime('ice', this.value)">
+                            <label style="display: block; margin-bottom: 10px; color: var(--neon-green); font-weight: 600;">
+                                📝 Note Sessione:
+                            </label>
+                            <textarea class="notes-textarea" placeholder="Temperatura acqua, numero round, sensazioni..." 
+                                      style="min-height: 80px;" onchange="saveRecoveryNote('ice', this.value)"></textarea>
                         </div>
                     </div>
                 </div>
@@ -1800,6 +1822,8 @@
             // Load section-specific content
             if (section === 'workout') {
                 loadTodaysWorkout();
+            } else if (section === 'recovery') {
+                loadRecoveryData();
             }
         }
 
@@ -2336,6 +2360,8 @@
         let workoutData = JSON.parse(localStorage.getItem('francescoWorkoutData')) || {};
         let completedExercises = JSON.parse(localStorage.getItem('francescoCompletedExercises')) || {};
         let exerciseNotes = JSON.parse(localStorage.getItem('francescoExerciseNotes')) || {};
+        let recoveryData = JSON.parse(localStorage.getItem('francescoRecoveryData')) || {};
+        let recoveryNotes = JSON.parse(localStorage.getItem('francescoRecoveryNotes')) || {};
         let stats = JSON.parse(localStorage.getItem('francescoStats')) || {
             currentWeek: 1,
             workoutsCompleted: 0,
@@ -2765,11 +2791,64 @@
             document.getElementById('currentStreak').textContent = stats.currentStreak;
         }
 
+        // Save Recovery Time
+        function saveRecoveryTime(type, minutes) {
+            const dateKey = currentDate.toISOString().split('T')[0];
+            if (!recoveryData[dateKey]) {
+                recoveryData[dateKey] = {};
+            }
+            recoveryData[dateKey][type] = parseInt(minutes) || 0;
+            saveData();
+        }
+
+        // Save Recovery Note
+        function saveRecoveryNote(type, note) {
+            const dateKey = currentDate.toISOString().split('T')[0];
+            const noteKey = `${dateKey}-${type}`;
+            recoveryNotes[noteKey] = note;
+            saveData();
+        }
+
+        // Load Recovery Data
+        function loadRecoveryData() {
+            const dateKey = currentDate.toISOString().split('T')[0];
+            
+            // Load times
+            if (recoveryData[dateKey]) {
+                if (recoveryData[dateKey].sauna) {
+                    document.getElementById('saunaTime').value = recoveryData[dateKey].sauna;
+                }
+                if (recoveryData[dateKey].steam) {
+                    document.getElementById('steamTime').value = recoveryData[dateKey].steam;
+                }
+                if (recoveryData[dateKey].ice) {
+                    document.getElementById('iceTime').value = recoveryData[dateKey].ice;
+                }
+            }
+            
+            // Load notes
+            const saunaNote = recoveryNotes[`${dateKey}-sauna`];
+            const steamNote = recoveryNotes[`${dateKey}-steam`];
+            const iceNote = recoveryNotes[`${dateKey}-ice`];
+            
+            if (saunaNote) {
+                document.querySelector('textarea[onchange*="sauna"]').value = saunaNote;
+            }
+            if (steamNote) {
+                document.querySelector('textarea[onchange*="steam"]').value = steamNote;
+            }
+            if (iceNote) {
+                document.querySelector('textarea[onchange*="ice"]').value = iceNote;
+            }
+        }
+
         // Save Data
         function saveData() {
             localStorage.setItem('francescoWorkoutData', JSON.stringify(workoutData));
             localStorage.setItem('francescoCompletedExercises', JSON.stringify(completedExercises));
             localStorage.setItem('francescoExerciseNotes', JSON.stringify(exerciseNotes));
+            localStorage.setItem('francescoRecoveryData', JSON.stringify(recoveryData));
+            localStorage.setItem('francescoRecoveryNotes', JSON.stringify(recoveryNotes));
         }
 
         function saveStats() {
