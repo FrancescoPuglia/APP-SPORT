@@ -1,20 +1,20 @@
 {
   "files": {
-    "main.css": "/APP-SPORT/static/css/main.c0098466.chunk.css",
-    "main.js": "/APP-SPORT/static/js/main.2dacc0b3.chunk.js",
-    "main.js.map": "/APP-SPORT/static/js/main.2dacc0b3.chunk.js.map",
+    "main.css": "/APP-SPORT/static/css/main.3de2a189.chunk.css",
+    "main.js": "/APP-SPORT/static/js/main.c79352cb.chunk.js",
+    "main.js.map": "/APP-SPORT/static/js/main.c79352cb.chunk.js.map",
     "runtime-main.js": "/APP-SPORT/static/js/runtime-main.a1a2e610.js",
     "runtime-main.js.map": "/APP-SPORT/static/js/runtime-main.a1a2e610.js.map",
     "static/js/2.70031f97.chunk.js": "/APP-SPORT/static/js/2.70031f97.chunk.js",
     "static/js/2.70031f97.chunk.js.map": "/APP-SPORT/static/js/2.70031f97.chunk.js.map",
     "index.html": "/APP-SPORT/index.html",
-    "static/css/main.c0098466.chunk.css.map": "/APP-SPORT/static/css/main.c0098466.chunk.css.map",
+    "static/css/main.3de2a189.chunk.css.map": "/APP-SPORT/static/css/main.3de2a189.chunk.css.map",
     "static/js/2.70031f97.chunk.js.LICENSE.txt": "/APP-SPORT/static/js/2.70031f97.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.a1a2e610.js",
     "static/js/2.70031f97.chunk.js",
-    "static/css/main.c0098466.chunk.css",
-    "static/js/main.2dacc0b3.chunk.js"
+    "static/css/main.3de2a189.chunk.css",
+    "static/js/main.c79352cb.chunk.js"
   ]
 }

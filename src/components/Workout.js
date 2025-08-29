@@ -1,9 +1,27 @@
 import React from 'react';
 import WorkoutTimer from './WorkoutTimer';
+import ExerciseTracker from './ExerciseTracker';
+import TechniqueGuides from './TechniqueGuides';
+import MotivationalQuotes from './MotivationalQuotes';
+import CalendarStreak from './CalendarStreak';
 
 const Workout = () => {
+    const exerciseHook = ExerciseTracker();
+    const techniqueHook = TechniqueGuides();
+    const quotesHook = MotivationalQuotes();
+    const calendarHook = CalendarStreak();
+    
     const [selectedDay, setSelectedDay] = React.useState(null);
     const [completedWorkouts, setCompletedWorkouts] = React.useState([]);
+    const [selectedExercise, setSelectedExercise] = React.useState(null);
+    const [exerciseForm, setExerciseForm] = React.useState({
+        sets: '',
+        reps: '',
+        weight: '',
+        rir: '',
+        notes: ''
+    });
+    const [showTechnique, setShowTechnique] = React.useState(false);
     
     const workoutPlan = {
         'Lunedì': {
@@ -108,6 +126,30 @@ const Workout = () => {
         }
     };
     
+    const handleExerciseComplete = () => {
+        if (!selectedExercise || !exerciseForm.sets || !exerciseForm.reps || !exerciseForm.weight) {
+            alert('Compila tutti i campi obbligatori!');
+            return;
+        }
+        
+        const isNewPR = exerciseHook.markExerciseCompleted(
+            selectedExercise.name,
+            exerciseForm.sets,
+            exerciseForm.reps,
+            exerciseForm.weight,
+            exerciseForm.notes,
+            exerciseForm.rir
+        );
+        
+        if (isNewPR) {
+            alert('🏆 NUOVO PERSONAL RECORD! Incredibile!');
+        }
+        
+        // Reset form
+        setExerciseForm({ sets: '', reps: '', weight: '', rir: '', notes: '' });
+        setSelectedExercise(null);
+    };
+    
     const markWorkoutCompleted = (day) => {
         const today = new Date().toISOString().split('T')[0];
         const workoutData = {
@@ -119,6 +161,12 @@ const Workout = () => {
         const updated = [workoutData, ...completedWorkouts];
         setCompletedWorkouts(updated);
         localStorage.setItem('completedWorkouts', JSON.stringify(updated));
+        
+        // Marca anche nel calendario streak
+        const todayWorkout = workoutPlan[day];
+        if (todayWorkout) {
+            calendarHook.markWorkoutCompleted(new Date(), todayWorkout.focus, todayWorkout.exercises);
+        }
     };
     
     const isWorkoutCompletedToday = (day) => {
@@ -126,6 +174,31 @@ const Workout = () => {
         return completedWorkouts.some(workout => 
             workout.day === day && workout.date === today
         );
+    };
+    
+    const getExerciseCompletionStatus = (exercises) => {
+        const completedCount = exercises.filter(ex => 
+            exerciseHook.isExerciseCompletedToday(ex.name)
+        ).length;
+        
+        return {
+            completed: completedCount,
+            total: exercises.length,
+            percentage: Math.round((completedCount / exercises.length) * 100)
+        };
+    };
+    
+    const getTodayWorkout = () => {
+        const today = new Date().getDay();
+        const todayWorkout = Object.entries(workoutPlan).find(([key]) => {
+            const dayMap = {
+                'Lunedì': 1, 'Martedì': 2, 'Mercoledì': 3, 'Giovedì': 4,
+                'Venerdì': 5, 'Sabato': 6, 'Domenica': 0
+            };
+            return dayMap[key] === today;
+        });
+        
+        return todayWorkout ? { day: todayWorkout[0], ...todayWorkout[1] } : null;
     };
     
     React.useEffect(() => {

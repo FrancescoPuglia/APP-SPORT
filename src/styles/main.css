@@ -68,61 +68,572 @@ p {
     color: #cccccc;
 }
 
-/* Dashboard Styles */
+/* LEGENDARY DASHBOARD STYLES */
 .dashboard-header {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 3rem;
+    background: linear-gradient(135deg, #ff006e 0%, #8338ec 50%, #3a86ff 100%);
+    padding: 3rem;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
 }
 
-.quick-nav {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
+.dashboard-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+    animation: shine 3s infinite;
 }
 
-.nav-card {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
-    padding: 1.5rem;
-    text-decoration: none;
-    color: inherit;
-    transition: all 0.3s ease;
+@keyframes shine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.dashboard-header h1 {
+    font-size: 3.5rem;
+    font-weight: 900;
+    text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+    margin-bottom: 1rem;
+    background: linear-gradient(45deg, #ffffff, #ffd700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.tagline {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    font-style: italic;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* DAILY MOTIVATION */
+.daily-motivation {
+    margin-bottom: 3rem;
+}
+
+.quote-card {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 0, 110, 0.1));
+    border: 2px solid #ffd700;
+    border-radius: 20px;
+    padding: 2.5rem;
     text-align: center;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(255, 215, 0, 0.2);
 }
 
-.nav-card:hover {
-    transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.15);
+.quote-card::before {
+    content: '""';
+    position: absolute;
+    top: -10px;
+    left: 30px;
+    font-size: 4rem;
+    color: #ffd700;
+    opacity: 0.3;
+}
+
+.quote-card blockquote {
+    font-size: 1.3rem;
+    font-style: italic;
+    color: #ffffff;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.quote-card footer {
+    font-size: 1.1rem;
+    color: #ffd700;
+    font-weight: bold;
+}
+
+.quote-context {
+    font-size: 0.9rem;
+    color: #cccccc;
+    margin-top: 1rem;
+    opacity: 0.8;
+}
+
+/* TODAY'S WORKOUT PREVIEW */
+.today-workout-preview {
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.15), rgba(0, 255, 255, 0.15));
+    border: 2px solid #00ff88;
+    border-radius: 20px;
+    padding: 2.5rem;
+    margin-bottom: 3rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.today-workout-preview::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(0, 255, 136, 0.3) 0%, transparent 70%);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.1); }
+}
+
+.today-workout-preview h3 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: #00ff88;
+    text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+}
+
+.workout-quick-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.workout-focus, .workout-exercises, .workout-progress {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    font-weight: bold;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.workout-progress.completed {
+    background: linear-gradient(135deg, #00ff88, #00ffff);
+    color: #000;
+    animation: celebration 1s ease-in-out;
+}
+
+@keyframes celebration {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.progress-bar {
+    width: 100%;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00ff88, #00ffff, #ff9500);
+    border-radius: 10px;
+    transition: width 0.8s ease;
+    position: relative;
+}
+
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: progress-shine 2s infinite;
+}
+
+@keyframes progress-shine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.start-workout-btn {
+    display: inline-block;
+    background: linear-gradient(135deg, #ff006e, #8338ec, #3a86ff);
+    color: white;
+    text-decoration: none;
+    padding: 1.2rem 3rem;
+    border-radius: 30px;
+    font-weight: 900;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 10px 30px rgba(255, 0, 110, 0.4);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.start-workout-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(255, 0, 110, 0.6);
+}
+
+.start-workout-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.start-workout-btn:hover::before {
+    left: 100%;
+}
+
+/* STREAK CALENDAR MINI */
+.streak-calendar-mini {
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 149, 0, 0.3);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 3rem;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.calendar-day-mini {
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.calendar-day-mini.completed {
+    background: linear-gradient(135deg, #00ff88, #00ffff);
+    border-color: #00ff88;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+    animation: completed-glow 2s infinite alternate;
+}
+
+@keyframes completed-glow {
+    0% { box-shadow: 0 0 20px rgba(0, 255, 136, 0.5); }
+    100% { box-shadow: 0 0 30px rgba(0, 255, 136, 0.8); }
+}
+
+.calendar-day-mini.today {
+    border: 3px solid #ffd700;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 149, 0, 0.2));
+}
+
+.day-number {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.workout-emoji {
+    font-size: 1.2rem;
+    margin-top: 2px;
+}
+
+.streak-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.current-streak {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-shadow: 0 0 10px currentColor;
+}
+
+.monthly-total {
+    font-size: 1.1rem;
     color: #00ffff;
 }
 
-.stats-grid {
+/* PERFORMANCE DASHBOARD */
+.performance-dashboard {
+    margin-bottom: 3rem;
+}
+
+.perf-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin: 1rem 0;
+    gap: 2rem;
+    margin-top: 2rem;
 }
 
-.stat-card {
-    background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 110, 0.1));
-    border: 1px solid rgba(0, 255, 255, 0.3);
-    border-radius: 10px;
-    padding: 1.5rem;
+.perf-card {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(255, 255, 255, 0.05));
+    border-radius: 20px;
+    padding: 2rem;
     text-align: center;
-    transition: transform 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
 }
 
-.stat-card:hover {
-    transform: translateY(-3px);
+.perf-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
-.stat-value {
-    font-size: 2rem;
+.perf-card:hover::before {
+    opacity: 1;
+}
+
+.perf-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.perf-card.strength {
+    border: 2px solid #ff006e;
+}
+
+.perf-card.volume {
+    border: 2px solid #00ff88;
+}
+
+.perf-card.consistency {
+    border: 2px solid #00ffff;
+}
+
+.perf-card.supplements {
+    border: 2px solid #ff9500;
+}
+
+.perf-value {
+    font-size: 3rem;
+    font-weight: 900;
+    margin: 1rem 0;
+    background: linear-gradient(45deg, #ffffff, #ffd700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+}
+
+.perf-label {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* GOALS PROGRESS */
+.goals-progress {
+    background: linear-gradient(135deg, rgba(131, 56, 236, 0.1), rgba(255, 0, 110, 0.1));
+    border: 2px solid #8338ec;
+    border-radius: 20px;
+    padding: 2.5rem;
+    margin-bottom: 3rem;
+}
+
+.goals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.goal-item {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    padding: 1.5rem;
+}
+
+.goal-bar {
+    width: 100%;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 1rem 0;
+    position: relative;
+}
+
+.goal-progress {
+    height: 100%;
+    background: linear-gradient(90deg, #8338ec, #ff006e);
+    border-radius: 10px;
+    transition: width 1s ease;
+    position: relative;
+}
+
+.goal-progress::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: goal-shine 3s infinite;
+}
+
+@keyframes goal-shine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* QUICK ACTIONS */
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.action-card {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(255, 255, 255, 0.05));
+    border-radius: 20px;
+    padding: 2rem;
+    text-decoration: none;
+    color: inherit;
+    text-align: center;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.action-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+}
+
+.action-card:hover::before {
+    transform: translateX(100%);
+}
+
+.action-card:hover {
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+}
+
+.action-card.workout {
+    border: 2px solid #00ff88;
+}
+
+.action-card.progress {
+    border: 2px solid #00ffff;
+}
+
+.action-card.supplements {
+    border: 2px solid #ff9500;
+}
+
+.action-card.recovery {
+    border: 2px solid #ff006e;
+}
+
+.action-icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.action-card h4 {
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+    color: #ffffff;
+}
+
+.action-card p {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+/* LEGEND MINDSET */
+.legend-mindset {
+    background: linear-gradient(135deg, #ff006e 0%, #8338ec 50%, #3a86ff 100%);
+    border-radius: 25px;
+    padding: 3rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.legend-mindset::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: mindset-rotate 10s linear infinite;
+}
+
+@keyframes mindset-rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.mindset-text {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.power-stats {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+}
+
+.power-stats span {
+    background: rgba(0, 0, 0, 0.4);
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
     font-weight: bold;
-    color: #00ff88;
-    margin-top: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    text-shadow: 0 0 10px currentColor;
+    animation: power-glow 3s infinite alternate;
+}
+
+@keyframes power-glow {
+    0% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); }
+    100% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.6); }
 }
 
 .streak-motivation {
@@ -581,6 +1092,7 @@ th {
     
     .control-buttons {
         flex-direction: column;
+        gap: 1rem;
     }
     
     .exercise-details {
@@ -596,5 +1108,33 @@ th {
     
     .workout-tips strong {
         min-width: unset;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .days-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* PRINT STYLES */
+@media print {
+    .dashboard-header,
+    .legend-mindset {
+        background: none !important;
+        color: #000 !important;
+    }
+    
+    .action-card,
+    .start-workout-btn {
+        display: none;
+    }
+    
+    .quote-card,
+    .perf-card {
+        border: 2px solid #000;
+        background: none;
     }
 }
