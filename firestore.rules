@@ -1,0 +1,277 @@
+// Firestore Security Rules - Enterprise Grade
+// Regole di sicurezza avanzate per app fitness con controllo granulare
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ========== UTILITY FUNCTIONS ==========
+    
+    // Verifica se l'utente è autenticato
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Verifica se l'utente è il proprietario della risorsa
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Verifica se l'utente è il proprietario del documento
+    function isDocumentOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+    
+    // Verifica se i dati contengono tutti i campi richiesti
+    function hasRequiredFields(requiredFields) {
+      return requiredFields.toSet().difference(
+        request.resource.data.keys().toSet()
+      ).size() == 0;
+    }
+    
+    // Verifica che timestamp di sistema siano utilizzati correttamente
+    function hasValidTimestamp() {
+      return request.resource.data.createdAt == request.time ||
+             request.resource.data.updatedAt == request.time;
+    }
+    
+    // Verifica dimensione ragionevole dei dati (max 1MB)
+    function isReasonableSize() {
+      return request.resource.size < 1048576; // 1MB
+    }
+    
+    // ========== USER DOCUMENTS ==========
+    
+    match /users/{userId} {
+      // Lettura: solo il proprietario può leggere i propri dati
+      allow read: if isOwner(userId);
+      
+      // Creazione: solo durante registrazione con dati validi
+      allow create: if isOwner(userId) 
+        && hasRequiredFields(['uid', 'email', 'createdAt'])
+        && request.resource.data.uid == userId
+        && request.resource.data.createdAt == request.time
+        && isReasonableSize();
+      
+      // Aggiornamento: solo proprietario con timestamp corretto
+      allow update: if isOwner(userId) 
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.uid == resource.data.uid // UID immutabile
+        && request.resource.data.createdAt == resource.data.createdAt // createdAt immutabile
+        && isReasonableSize();
+      
+      // Eliminazione: solo proprietario (soft delete preferito)
+      allow delete: if isOwner(userId);
+    }
+    
+    // ========== PROGRESS TRACKING ==========
+    
+    match /progress/{progressId} {
+      // Lettura: solo proprietario
+      allow read: if isDocumentOwner();
+      
+      // Creazione: solo per se stesso con validazioni
+      allow create: if isAuthenticated() 
+        && request.resource.data.userId == request.auth.uid
+        && hasRequiredFields(['userId', 'date', 'createdAt'])
+        && request.resource.data.createdAt == request.time
+        && validateProgressData()
+        && isReasonableSize();
+      
+      // Aggiornamento: solo proprietario
+      allow update: if isDocumentOwner() 
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.userId == resource.data.userId // userId immutabile
+        && validateProgressData()
+        && isReasonableSize();
+      
+      // Eliminazione: solo proprietario
+      allow delete: if isDocumentOwner();
+      
+      // Validazione dati progress
+      function validateProgressData() {
+        let data = request.resource.data;
+        return (
+          // Data deve essere una stringa valida YYYY-MM-DD
+          data.date is string &&
+          data.date.matches('^\\d{4}-\\d{2}-\\d{2}$') &&
+          
+          // Peso deve essere ragionevole (30-300 kg)
+          (!('weight' in data) || (data.weight is number && data.weight >= 30 && data.weight <= 300)) &&
+          
+          // Massa grassa deve essere percentuale valida (1-50%)
+          (!('bodyFat' in data) || (data.bodyFat is number && data.bodyFat >= 1 && data.bodyFat <= 50)) &&
+          
+          // Massa muscolare ragionevole (10-150 kg)
+          (!('muscleMass' in data) || (data.muscleMass is number && data.muscleMass >= 10 && data.muscleMass <= 150)) &&
+          
+          // Circonferenze ragionevoli (10-200 cm)
+          (!('chest' in data) || (data.chest is number && data.chest >= 50 && data.chest <= 200)) &&
+          (!('arms' in data) || (data.arms is number && data.arms >= 20 && data.arms <= 100)) &&
+          (!('waist' in data) || (data.waist is number && data.waist >= 50 && data.waist <= 150)) &&
+          (!('thighs' in data) || (data.thighs is number && data.thighs >= 30 && data.thighs <= 100)) &&
+          
+          // Note opzionali ma se presenti max 1000 caratteri
+          (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000))
+        );
+      }
+    }
+    
+    // ========== WORKOUT SESSIONS ==========
+    
+    match /workouts/{workoutId} {
+      // Lettura: solo proprietario
+      allow read: if isDocumentOwner();
+      
+      // Creazione: solo per se stesso
+      allow create: if isAuthenticated() 
+        && request.resource.data.userId == request.auth.uid
+        && hasRequiredFields(['userId', 'createdAt'])
+        && request.resource.data.createdAt == request.time
+        && validateWorkoutData()
+        && isReasonableSize();
+      
+      // Aggiornamento: solo proprietario
+      allow update: if isDocumentOwner() 
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.userId == resource.data.userId
+        && validateWorkoutData()
+        && isReasonableSize();
+      
+      // Eliminazione: solo proprietario
+      allow delete: if isDocumentOwner();
+      
+      // Validazione dati workout
+      function validateWorkoutData() {
+        let data = request.resource.data;
+        return (
+          // Status deve essere valido
+          (!('status' in data) || data.status in ['planned', 'in_progress', 'completed', 'cancelled']) &&
+          
+          // Durata ragionevole (0-480 minuti = 8 ore)
+          (!('totalDuration' in data) || (data.totalDuration is number && data.totalDuration >= 0 && data.totalDuration <= 480)) &&
+          
+          // Nome workout opzionale max 100 caratteri
+          (!('name' in data) || (data.name is string && data.name.size() <= 100)) &&
+          
+          // Note opzionali max 1000 caratteri
+          (!('notes' in data) || (data.notes is string && data.notes.size() <= 1000))
+        );
+      }
+    }
+    
+    // ========== EXERCISE TRACKING ==========
+    
+    match /exercises/{exerciseId} {
+      // Lettura: solo proprietario
+      allow read: if isDocumentOwner();
+      
+      // Creazione: solo per se stesso
+      allow create: if isAuthenticated() 
+        && request.resource.data.userId == request.auth.uid
+        && hasRequiredFields(['userId', 'exerciseName', 'createdAt'])
+        && request.resource.data.createdAt == request.time
+        && validateExerciseData()
+        && isReasonableSize();
+      
+      // Aggiornamento: solo proprietario
+      allow update: if isDocumentOwner() 
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.userId == resource.data.userId
+        && validateExerciseData()
+        && isReasonableSize();
+      
+      // Eliminazione: solo proprietario
+      allow delete: if isDocumentOwner();
+      
+      // Validazione dati esercizio
+      function validateExerciseData() {
+        let data = request.resource.data;
+        return (
+          // Nome esercizio richiesto, max 100 caratteri
+          data.exerciseName is string && 
+          data.exerciseName.size() > 0 && 
+          data.exerciseName.size() <= 100 &&
+          
+          // Serie ragionevoli (1-20)
+          (!('sets' in data) || (data.sets is number && data.sets >= 1 && data.sets <= 20)) &&
+          
+          // Ripetizioni ragionevoli (1-100)
+          (!('reps' in data) || (data.reps is number && data.reps >= 1 && data.reps <= 100)) &&
+          
+          // Peso ragionevole (0-1000 kg)
+          (!('weight' in data) || (data.weight is number && data.weight >= 0 && data.weight <= 1000)) &&
+          
+          // RIR valido (0-10)
+          (!('rir' in data) || (data.rir is number && data.rir >= 0 && data.rir <= 10)) &&
+          
+          // Data valida
+          (!('date' in data) || (data.date is string && data.date.matches('^\\d{4}-\\d{2}-\\d{2}$'))) &&
+          
+          // Note opzionali max 500 caratteri
+          (!('notes' in data) || (data.notes is string && data.notes.size() <= 500))
+        );
+      }
+    }
+    
+    // ========== ANALYTICS E REPORTING ==========
+    
+    match /analytics/{analyticsId} {
+      // Solo lettura per proprietario
+      allow read: if isDocumentOwner();
+      
+      // Creazione solo da funzioni server o batch jobs
+      allow create: if false; // Gestito via Cloud Functions
+      
+      // Aggiornamento solo da funzioni server
+      allow update: if false; // Gestito via Cloud Functions
+      
+      // Eliminazione solo proprietario (per privacy)
+      allow delete: if isDocumentOwner();
+    }
+    
+    // ========== SYSTEM COLLECTIONS (ADMIN ONLY) ==========
+    
+    match /system/{document=**} {
+      // Accesso negato a tutti gli utenti normali
+      // Solo Cloud Functions e Admin SDK
+      allow read, write: if false;
+    }
+    
+    // ========== FALLBACK RULE ==========
+    
+    // Nega accesso a qualsiasi altra collection non specificata
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+// ========== STORAGE RULES (per completezza) ==========
+/*
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // User profile images
+    match /users/{userId}/profile/{imageId} {
+      allow read: if true; // Immagini profilo pubbliche
+      allow write: if request.auth != null 
+        && request.auth.uid == userId
+        && request.resource.size < 5 * 1024 * 1024 // Max 5MB
+        && request.resource.contentType.matches('image/.*');
+    }
+    
+    // Workout images/videos
+    match /workouts/{userId}/{mediaId} {
+      allow read, write: if request.auth != null 
+        && request.auth.uid == userId
+        && request.resource.size < 50 * 1024 * 1024; // Max 50MB
+    }
+    
+    // Deny everything else
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
+*/
