@@ -251,15 +251,30 @@ const Dashboard = () => {
                     <h4>Progressi</h4>
                     <p>Traccia misure</p>
                 </Link>
+                <Link to="/nutrition-tracker" className="action-card nutrition">
+                    <span className="action-icon">🥗</span>
+                    <h4>Dieta</h4>
+                    <p>Finestra 8-16</p>
+                </Link>
+                <Link to="/recovery-timer" className="action-card recovery-timer">
+                    <span className="action-icon">🔥</span>
+                    <h4>Recovery</h4>
+                    <p>Timer sauna/ice</p>
+                </Link>
                 <Link to="/supplements" className="action-card supplements">
                     <span className="action-icon">💊</span>
                     <h4>Integratori</h4>
                     <p>{supplementProgress.taken}/{supplementProgress.total} presi</p>
                 </Link>
                 <Link to="/recovery" className="action-card recovery">
-                    <span className="action-icon">🔥</span>
-                    <h4>Recovery</h4>
+                    <span className="action-icon">🧘</span>
+                    <h4>Recovery Info</h4>
                     <p>{recoveryStats.totalTime || 0}min oggi</p>
+                </Link>
+                <Link to="/analytics" className="action-card analytics">
+                    <span className="action-icon">📊</span>
+                    <h4>Analytics</h4>
+                    <p>Grafici avanzati</p>
                 </Link>
             </nav>
 

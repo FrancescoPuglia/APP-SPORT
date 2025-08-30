@@ -446,11 +446,247 @@ class UserRepository extends BaseRepository {
     }
 }
 
+// Repository per Nutrition Tracking
+class NutritionRepository extends BaseRepository {
+    constructor() {
+        super('nutrition');
+    }
+
+    // Registra pasto completato/saltato
+    async logMeal(mealData) {
+        const data = {
+            ...mealData,
+            date: mealData.date || new Date().toISOString().split('T')[0],
+            completedAt: mealData.status === 'completed' ? new Date() : null
+        };
+        
+        return this.create(data);
+    }
+
+    // Aggiorna stato pasto
+    async updateMealStatus(mealId, status, notes = null) {
+        const updateData = {
+            status,
+            notes,
+            completedAt: status === 'completed' ? new Date() : null
+        };
+        
+        return this.update(mealId, updateData);
+    }
+
+    // Ottieni pasti utente per data/range
+    async getUserMeals(startDate = null, endDate = null) {
+        const userId = authService.getCurrentUser()?.uid;
+        if (!userId) return { success: false, error: 'Utente non autenticato', data: [] };
+
+        const constraints = [
+            where('userId', '==', userId),
+            orderBy('date', 'desc')
+        ];
+
+        if (startDate) {
+            constraints.push(where('date', '>=', startDate));
+        }
+
+        if (endDate) {
+            constraints.push(where('date', '<=', endDate));
+        }
+
+        return this.getWithQuery(constraints);
+    }
+
+    // Ottieni pasti per giorno specifico
+    async getDayMeals(date) {
+        const userId = authService.getCurrentUser()?.uid;
+        if (!userId) return { success: false, error: 'Utente non autenticato', data: [] };
+
+        return this.getWithQuery([
+            where('userId', '==', userId),
+            where('date', '==', date),
+            orderBy('mealType', 'asc')
+        ]);
+    }
+
+    // Statistiche nutrizionali periodo
+    async getNutritionStats(days = 30) {
+        const userId = authService.getCurrentUser()?.uid;
+        if (!userId) return { success: false, error: 'Utente non autenticato' };
+
+        const endDate = new Date();
+        const startDate = new Date(endDate.getTime() - (days * 24 * 60 * 60 * 1000));
+
+        const result = await this.getUserMeals(
+            startDate.toISOString().split('T')[0],
+            endDate.toISOString().split('T')[0]
+        );
+
+        if (!result.success) return result;
+
+        const meals = result.data;
+        const completedMeals = meals.filter(m => m.status === 'completed');
+        const totalMeals = meals.length;
+        const adherenceRate = totalMeals > 0 ? (completedMeals.length / totalMeals) * 100 : 0;
+
+        // Calcola proteine totali (se tracked)
+        const totalProteins = completedMeals.reduce((sum, meal) => sum + (meal.proteins || 0), 0);
+        const avgProteinsPerDay = days > 0 ? totalProteins / days : 0;
+
+        // Calcola streak
+        const streak = this.calculateNutritionStreak(meals);
+
+        return {
+            success: true,
+            stats: {
+                totalMeals,
+                completedMeals: completedMeals.length,
+                adherenceRate: Math.round(adherenceRate),
+                totalProteins,
+                avgProteinsPerDay: Math.round(avgProteinsPerDay),
+                currentStreak: streak,
+                period: { startDate, endDate, days }
+            }
+        };
+    }
+
+    // Calcola streak nutrizionale
+    calculateNutritionStreak(meals) {
+        if (!meals.length) return 0;
+
+        // Raggruppa pasti per giorno
+        const mealsByDay = {};
+        meals.forEach(meal => {
+            if (!mealsByDay[meal.date]) {
+                mealsByDay[meal.date] = [];
+            }
+            mealsByDay[meal.date].push(meal);
+        });
+
+        // Calcola streak giorni consecutivi con adherence > 66%
+        let streak = 0;
+        const sortedDates = Object.keys(mealsByDay).sort().reverse();
+
+        for (const date of sortedDates) {
+            const dayMeals = mealsByDay[date];
+            const completedMeals = dayMeals.filter(m => m.status === 'completed');
+            const adherence = completedMeals.length / dayMeals.length;
+
+            if (adherence >= 0.66) { // Almeno 2/3 dei pasti completati
+                streak++;
+            } else {
+                break;
+            }
+        }
+
+        return streak;
+    }
+}
+
+// Repository per Recovery Tracking
+class RecoveryRepository extends BaseRepository {
+    constructor() {
+        super('recovery');
+    }
+
+    // Registra sessione recovery
+    async logRecoverySession(recoveryData) {
+        const data = {
+            ...recoveryData,
+            date: recoveryData.date || new Date().toISOString().split('T')[0],
+            completedAt: new Date()
+        };
+        
+        return this.create(data);
+    }
+
+    // Ottieni sessioni recovery utente
+    async getUserRecoverySessions(startDate = null, endDate = null) {
+        const userId = authService.getCurrentUser()?.uid;
+        if (!userId) return { success: false, error: 'Utente non autenticato', data: [] };
+
+        const constraints = [
+            where('userId', '==', userId),
+            orderBy('date', 'desc')
+        ];
+
+        if (startDate) {
+            constraints.push(where('date', '>=', startDate));
+        }
+
+        if (endDate) {
+            constraints.push(where('date', '<=', endDate));
+        }
+
+        return this.getWithQuery(constraints);
+    }
+
+    // Ottieni sessioni per giorno
+    async getDayRecoverySessions(date) {
+        const userId = authService.getCurrentUser()?.uid;
+        if (!userId) return { success: false, error: 'Utente non autenticato', data: [] };
+
+        return this.getWithQuery([
+            where('userId', '==', userId),
+            where('date', '==', date),
+            orderBy('createdAt', 'desc')
+        ]);
+    }
+
+    // Statistiche recovery
+    async getRecoveryStats(days = 30) {
+        const userId = authService.getCurrentUser()?.uid;
+        if (!userId) return { success: false, error: 'Utente non autenticato' };
+
+        const endDate = new Date();
+        const startDate = new Date(endDate.getTime() - (days * 24 * 60 * 60 * 1000));
+
+        const result = await this.getUserRecoverySessions(
+            startDate.toISOString().split('T')[0],
+            endDate.toISOString().split('T')[0]
+        );
+
+        if (!result.success) return result;
+
+        const sessions = result.data;
+        const totalSessions = sessions.length;
+        const totalDuration = sessions.reduce((sum, s) => sum + (s.duration || 0), 0);
+        const avgDuration = totalSessions > 0 ? totalDuration / totalSessions : 0;
+
+        // Breakdown per tipo attività
+        const activityBreakdown = {};
+        sessions.forEach(session => {
+            const type = session.activityType;
+            if (!activityBreakdown[type]) {
+                activityBreakdown[type] = { count: 0, totalDuration: 0 };
+            }
+            activityBreakdown[type].count++;
+            activityBreakdown[type].totalDuration += session.duration || 0;
+        });
+
+        // Calcola frequenza settimanale
+        const weeksInPeriod = Math.ceil(days / 7);
+        const weeklyFrequency = totalSessions / weeksInPeriod;
+
+        return {
+            success: true,
+            stats: {
+                totalSessions,
+                totalDuration,
+                avgDuration: Math.round(avgDuration),
+                weeklyFrequency: Math.round(weeklyFrequency * 10) / 10,
+                activityBreakdown,
+                period: { startDate, endDate, days }
+            }
+        };
+    }
+}
+
 // Istanze singleton dei repository
 export const progressRepo = new ProgressRepository();
 export const workoutRepo = new WorkoutRepository();
 export const exerciseRepo = new ExerciseRepository();
 export const userRepo = new UserRepository();
+export const nutritionRepo = new NutritionRepository();
+export const recoveryRepo = new RecoveryRepository();
 
 // Utility per operazioni batch
 export const batchOperations = {
@@ -533,5 +769,7 @@ export default {
     workoutRepo,
     exerciseRepo,
     userRepo,
+    nutritionRepo,
+    recoveryRepo,
     batchOperations
 };

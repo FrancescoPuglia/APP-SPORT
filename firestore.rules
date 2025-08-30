@@ -214,6 +214,104 @@ service cloud.firestore {
       }
     }
     
+    // ========== NUTRITION TRACKING ==========
+    
+    match /nutrition/{nutritionId} {
+      // Lettura: solo proprietario
+      allow read: if isDocumentOwner();
+      
+      // Creazione: solo per se stesso
+      allow create: if isAuthenticated() 
+        && request.resource.data.userId == request.auth.uid
+        && hasRequiredFields(['userId', 'date', 'mealType', 'createdAt'])
+        && request.resource.data.createdAt == request.time
+        && validateNutritionData()
+        && isReasonableSize();
+      
+      // Aggiornamento: solo proprietario
+      allow update: if isDocumentOwner() 
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.userId == resource.data.userId
+        && validateNutritionData()
+        && isReasonableSize();
+      
+      // Eliminazione: solo proprietario
+      allow delete: if isDocumentOwner();
+      
+      // Validazione dati nutrition
+      function validateNutritionData() {
+        let data = request.resource.data;
+        return (
+          // Data deve essere valida YYYY-MM-DD
+          data.date is string && data.date.matches('^\\d{4}-\\d{2}-\\d{2}$') &&
+          
+          // MealType deve essere valido
+          data.mealType in ['colazione', 'pranzo', 'snack', 'extra'] &&
+          
+          // Status deve essere valido
+          (!('status' in data) || data.status in ['planned', 'completed', 'skipped']) &&
+          
+          // Note opzionali max 500 caratteri
+          (!('notes' in data) || (data.notes is string && data.notes.size() <= 500)) &&
+          
+          // Proteine se presenti devono essere ragionevoli (0-100g per pasto)
+          (!('proteins' in data) || (data.proteins is number && data.proteins >= 0 && data.proteins <= 100)) &&
+          
+          // Calorie se presenti devono essere ragionevoli (0-2000 per pasto)
+          (!('calories' in data) || (data.calories is number && data.calories >= 0 && data.calories <= 2000))
+        );
+      }
+    }
+    
+    // ========== RECOVERY TRACKING ==========
+    
+    match /recovery/{recoveryId} {
+      // Lettura: solo proprietario
+      allow read: if isDocumentOwner();
+      
+      // Creazione: solo per se stesso
+      allow create: if isAuthenticated() 
+        && request.resource.data.userId == request.auth.uid
+        && hasRequiredFields(['userId', 'date', 'activityType', 'createdAt'])
+        && request.resource.data.createdAt == request.time
+        && validateRecoveryData()
+        && isReasonableSize();
+      
+      // Aggiornamento: solo proprietario
+      allow update: if isDocumentOwner() 
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.userId == resource.data.userId
+        && validateRecoveryData()
+        && isReasonableSize();
+      
+      // Eliminazione: solo proprietario
+      allow delete: if isDocumentOwner();
+      
+      // Validazione dati recovery
+      function validateRecoveryData() {
+        let data = request.resource.data;
+        return (
+          // Data deve essere valida YYYY-MM-DD
+          data.date is string && data.date.matches('^\\d{4}-\\d{2}-\\d{2}$') &&
+          
+          // ActivityType deve essere valido
+          data.activityType in ['sauna', 'steam_bath', 'ice_bath', 'cold_shower', 'stretching', 'meditation'] &&
+          
+          // Durata ragionevole (1-120 minuti)
+          (!('duration' in data) || (data.duration is number && data.duration >= 1 && data.duration <= 120)) &&
+          
+          // Temperatura se presente deve essere ragionevole (-10 a 100°C)
+          (!('temperature' in data) || (data.temperature is number && data.temperature >= -10 && data.temperature <= 100)) &&
+          
+          // Intensità 1-10
+          (!('intensity' in data) || (data.intensity is number && data.intensity >= 1 && data.intensity <= 10)) &&
+          
+          // Note opzionali max 500 caratteri
+          (!('notes' in data) || (data.notes is string && data.notes.size() <= 500))
+        );
+      }
+    }
+
     // ========== ANALYTICS E REPORTING ==========
     
     match /analytics/{analyticsId} {

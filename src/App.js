@@ -8,12 +8,16 @@ import Supplements from './components/Supplements';
 import Recovery from './components/Recovery';
 import Progress from './components/Progress';
 import AdvancedAnalytics from './components/AdvancedAnalytics';
+import NutritionTracker from './components/NutritionTracker';
+import RecoveryTimer from './components/RecoveryTimer';
 import AuthModal from './components/AuthModal';
 import MigrationModal from './components/MigrationModal';
 import './styles/main.css';
 
 // Lazy loading per componenti pesanti
 const LazyAnalytics = lazy(() => import('./components/AdvancedAnalytics'));
+const LazyNutritionTracker = lazy(() => import('./components/NutritionTracker'));
+const LazyRecoveryTimer = lazy(() => import('./components/RecoveryTimer'));
 
 // Componente principale con gestione auth e routing
 function AppContent() {
@@ -67,6 +71,16 @@ function AppContent() {
                     <Route path="/analytics" element={
                         <Suspense fallback={<div className="loading-analytics">Caricamento Analytics...</div>}>
                             <LazyAnalytics />
+                        </Suspense>
+                    } />
+                    <Route path="/nutrition-tracker" element={
+                        <Suspense fallback={<div className="loading-nutrition">Caricamento Nutrition Tracker...</div>}>
+                            <LazyNutritionTracker />
+                        </Suspense>
+                    } />
+                    <Route path="/recovery-timer" element={
+                        <Suspense fallback={<div className="loading-recovery">Caricamento Recovery Timer...</div>}>
+                            <LazyRecoveryTimer />
                         </Suspense>
                     } />
                 </Routes>

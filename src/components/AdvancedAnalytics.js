@@ -19,7 +19,7 @@ import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval } from 'date-fns';
 import { it } from 'date-fns/locale';
 
-import { progressRepo, workoutRepo, exerciseRepo } from '../firebase/firestore';
+import { progressRepo, workoutRepo, exerciseRepo, nutritionRepo, recoveryRepo } from '../firebase/firestore';
 import { useAuth } from './AuthProvider';
 import { logger } from '../firebase/config';
 
@@ -42,7 +42,9 @@ const AdvancedAnalytics = () => {
     const [analyticsData, setAnalyticsData] = useState({
         progress: [],
         workouts: [],
-        exercises: []
+        exercises: [],
+        nutrition: [],
+        recovery: []
     });
     const [loading, setLoading] = useState(true);
     const [selectedPeriod, setSelectedPeriod] = useState('3months');
@@ -63,25 +65,37 @@ const AdvancedAnalytics = () => {
             const startDate = getPeriodStartDate(selectedPeriod);
 
             // Carica dati paralleli per performance
-            const [progressResult, workoutResult, exerciseResult] = await Promise.all([
+            const [progressResult, workoutResult, exerciseResult, nutritionResult, recoveryResult] = await Promise.all([
                 progressRepo.getUserProgress(
                     startDate.toISOString().split('T')[0],
                     endDate.toISOString().split('T')[0]
                 ),
                 workoutRepo.getUserSessions(100),
-                exerciseRepo.getWithQuery([])
+                exerciseRepo.getWithQuery([]),
+                nutritionRepo.getUserMeals(
+                    startDate.toISOString().split('T')[0],
+                    endDate.toISOString().split('T')[0]
+                ),
+                recoveryRepo.getUserRecoverySessions(
+                    startDate.toISOString().split('T')[0],
+                    endDate.toISOString().split('T')[0]
+                )
             ]);
 
             setAnalyticsData({
                 progress: progressResult.success ? progressResult.data : [],
                 workouts: workoutResult.success ? workoutResult.data : [],
-                exercises: exerciseResult.success ? exerciseResult.data : []
+                exercises: exerciseResult.success ? exerciseResult.data : [],
+                nutrition: nutritionResult.success ? nutritionResult.data : [],
+                recovery: recoveryResult.success ? recoveryResult.data : []
             });
 
             logger.success('Dati analytics caricati', {
                 progress: progressResult.data?.length || 0,
                 workouts: workoutResult.data?.length || 0,
-                exercises: exerciseResult.data?.length || 0
+                exercises: exerciseResult.data?.length || 0,
+                nutrition: nutritionResult.data?.length || 0,
+                recovery: recoveryResult.data?.length || 0
             });
 
         } catch (error) {
@@ -245,6 +259,145 @@ const AdvancedAnalytics = () => {
         };
     }, [analyticsData.exercises]);
 
+    // ========== NUTRITION ANALYTICS ==========
+    
+    const nutritionAdherenceData = useMemo(() => {
+        if (!analyticsData.nutrition.length) return null;
+
+        const now = new Date();
+        const last30Days = eachDayOfInterval({
+            start: subDays(now, 29),
+            end: now
+        });
+
+        const dailyAdherence = last30Days.map(day => {
+            const dayStr = format(day, 'yyyy-MM-dd');
+            const dayMeals = analyticsData.nutrition.filter(meal => meal.date === dayStr);
+            const completedMeals = dayMeals.filter(meal => meal.status === 'completed');
+            
+            const adherenceRate = dayMeals.length > 0 ? (completedMeals.length / dayMeals.length) * 100 : 0;
+            const totalProteins = completedMeals.reduce((sum, meal) => sum + (meal.proteins || 0), 0);
+
+            return {
+                date: dayStr,
+                label: format(day, 'dd/MM'),
+                adherenceRate,
+                totalProteins,
+                completedMeals: completedMeals.length,
+                totalMeals: dayMeals.length
+            };
+        });
+
+        return {
+            labels: dailyAdherence.map(d => d.label),
+            datasets: [
+                {
+                    label: 'Aderenza Dieta (%)',
+                    data: dailyAdherence.map(d => d.adherenceRate),
+                    borderColor: 'rgb(34, 197, 94)',
+                    backgroundColor: 'rgba(34, 197, 94, 0.2)',
+                    fill: true,
+                    tension: 0.3,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Proteine Giornaliere (g)',
+                    data: dailyAdherence.map(d => d.totalProteins),
+                    borderColor: 'rgb(168, 85, 247)',
+                    backgroundColor: 'rgba(168, 85, 247, 0.2)',
+                    fill: false,
+                    tension: 0.3,
+                    yAxisID: 'y1'
+                }
+            ]
+        };
+    }, [analyticsData.nutrition]);
+
+    // ========== RECOVERY ANALYTICS ==========
+    
+    const recoveryDistributionData = useMemo(() => {
+        if (!analyticsData.recovery.length) return null;
+
+        const recoveryCount = {};
+        const recoveryDuration = {};
+        
+        analyticsData.recovery.forEach(session => {
+            const type = session.activityType;
+            recoveryCount[type] = (recoveryCount[type] || 0) + 1;
+            recoveryDuration[type] = (recoveryDuration[type] || 0) + (session.duration || 0);
+        });
+
+        const activities = {
+            sauna: { name: '🔥 Sauna', color: '#ef4444' },
+            steam_bath: { name: '💨 Bagno Turco', color: '#06b6d4' },
+            ice_bath: { name: '🧊 Ice Bath', color: '#3b82f6' },
+            cold_shower: { name: '🚿 Doccia Fredda', color: '#6366f1' },
+            stretching: { name: '🤸 Stretching', color: '#8b5cf6' },
+            meditation: { name: '🧘 Meditazione', color: '#a855f7' }
+        };
+
+        const sortedActivities = Object.entries(recoveryCount)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 6);
+
+        return {
+            labels: sortedActivities.map(([type]) => activities[type]?.name || type),
+            datasets: [{
+                label: 'Sessioni Recovery',
+                data: sortedActivities.map(([, count]) => count),
+                backgroundColor: sortedActivities.map(([type]) => activities[type]?.color || '#6b7280'),
+                borderColor: sortedActivities.map(([type]) => activities[type]?.color || '#6b7280'),
+                borderWidth: 2
+            }]
+        };
+    }, [analyticsData.recovery]);
+
+    const weeklyRecoveryData = useMemo(() => {
+        if (!analyticsData.recovery.length) return null;
+
+        const now = new Date();
+        const last4Weeks = [];
+        
+        for (let i = 3; i >= 0; i--) {
+            const weekStart = startOfWeek(subDays(now, i * 7), { locale: it });
+            const weekEnd = endOfWeek(weekStart, { locale: it });
+            
+            const weekSessions = analyticsData.recovery.filter(session => {
+                const sessionDate = new Date(session.date);
+                return sessionDate >= weekStart && sessionDate <= weekEnd;
+            });
+
+            const totalDuration = weekSessions.reduce((sum, s) => sum + (s.duration || 0), 0);
+            
+            last4Weeks.push({
+                label: format(weekStart, 'dd MMM', { locale: it }),
+                sessions: weekSessions.length,
+                duration: totalDuration
+            });
+        }
+
+        return {
+            labels: last4Weeks.map(w => w.label),
+            datasets: [
+                {
+                    label: 'Sessioni Recovery',
+                    data: last4Weeks.map(w => w.sessions),
+                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 2
+                },
+                {
+                    label: 'Durata Totale (min)',
+                    data: last4Weeks.map(w => w.duration),
+                    backgroundColor: 'rgba(168, 85, 247, 0.8)',
+                    borderColor: 'rgba(168, 85, 247, 1)',
+                    borderWidth: 2,
+                    yAxisID: 'y1'
+                }
+            ]
+        };
+    }, [analyticsData.recovery]);
+
     // ========== STATISTICS COMPUTATION ==========
     
     const computedStats = useMemo(() => {
@@ -255,7 +408,10 @@ const AdvancedAnalytics = () => {
             totalExercises: analyticsData.exercises.length,
             uniqueExercises: new Set(analyticsData.exercises.map(e => e.exerciseName)).size,
             currentStreak: calculateCurrentStreak(),
-            progressEntries: analyticsData.progress.length
+            progressEntries: analyticsData.progress.length,
+            nutritionAdherence: calculateNutritionAdherence(),
+            recoverySessionsTotal: analyticsData.recovery.length,
+            avgRecoveryDuration: calculateAvgRecoveryDuration()
         };
 
         stats.averageWorkoutDuration = stats.totalWorkouts > 0 
@@ -341,6 +497,18 @@ const AdvancedAnalytics = () => {
         }
 
         return trends;
+    };
+
+    const calculateNutritionAdherence = () => {
+        if (!analyticsData.nutrition.length) return 0;
+        const completedMeals = analyticsData.nutrition.filter(meal => meal.status === 'completed');
+        return Math.round((completedMeals.length / analyticsData.nutrition.length) * 100);
+    };
+
+    const calculateAvgRecoveryDuration = () => {
+        if (!analyticsData.recovery.length) return 0;
+        const totalDuration = analyticsData.recovery.reduce((sum, session) => sum + (session.duration || 0), 0);
+        return Math.round(totalDuration / analyticsData.recovery.length);
     };
 
     // ========== CHART OPTIONS ==========
@@ -489,6 +657,28 @@ const AdvancedAnalytics = () => {
                         )}
                     </div>
                 </div>
+
+                <div className="stat-card">
+                    <div className="stat-icon">🥗</div>
+                    <div className="stat-content">
+                        <h3>{computedStats.nutritionAdherence}%</h3>
+                        <p>Aderenza Dieta</p>
+                        <span className="sub-stat">
+                            {analyticsData.nutrition.filter(m => m.status === 'completed').length} pasti completati
+                        </span>
+                    </div>
+                </div>
+
+                <div className="stat-card">
+                    <div className="stat-icon">🛁</div>
+                    <div className="stat-content">
+                        <h3>{computedStats.recoverySessionsTotal}</h3>
+                        <p>Sessioni Recovery</p>
+                        <span className="sub-stat">
+                            Avg: {computedStats.avgRecoveryDuration}min
+                        </span>
+                    </div>
+                </div>
             </div>
 
             {/* Charts Grid */}
@@ -540,6 +730,104 @@ const AdvancedAnalytics = () => {
                                     }
                                 }} 
                             />
+                        </div>
+                    </div>
+                )}
+
+                {/* Nutrition Adherence Chart */}
+                {nutritionAdherenceData && (
+                    <div className="chart-container">
+                        <h3>🥗 Aderenza Dieta & Proteine (30 giorni)</h3>
+                        <div className="chart-wrapper">
+                            <Line data={nutritionAdherenceData} options={{
+                                ...chartOptions,
+                                scales: {
+                                    x: chartOptions.scales.x,
+                                    y: {
+                                        ...chartOptions.scales.y,
+                                        beginAtZero: true,
+                                        max: 100,
+                                        title: {
+                                            display: true,
+                                            text: 'Aderenza (%)'
+                                        }
+                                    },
+                                    y1: {
+                                        type: 'linear',
+                                        display: true,
+                                        position: 'right',
+                                        beginAtZero: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Proteine (g)'
+                                        },
+                                        grid: {
+                                            drawOnChartArea: false,
+                                        }
+                                    }
+                                }
+                            }} />
+                        </div>
+                    </div>
+                )}
+
+                {/* Recovery Distribution */}
+                {recoveryDistributionData && (
+                    <div className="chart-container">
+                        <h3>🛁 Distribuzione Pratiche Recovery</h3>
+                        <div className="chart-wrapper">
+                            <Doughnut 
+                                data={recoveryDistributionData} 
+                                options={{
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: {
+                                            position: 'bottom',
+                                            labels: {
+                                                boxWidth: 12,
+                                                padding: 15
+                                            }
+                                        }
+                                    }
+                                }} 
+                            />
+                        </div>
+                    </div>
+                )}
+
+                {/* Weekly Recovery Trends */}
+                {weeklyRecoveryData && (
+                    <div className="chart-container">
+                        <h3>📊 Tendenze Recovery Settimanali</h3>
+                        <div className="chart-wrapper">
+                            <Bar data={weeklyRecoveryData} options={{
+                                ...chartOptions,
+                                scales: {
+                                    x: chartOptions.scales.x,
+                                    y: {
+                                        ...chartOptions.scales.y,
+                                        beginAtZero: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Sessioni'
+                                        }
+                                    },
+                                    y1: {
+                                        type: 'linear',
+                                        display: true,
+                                        position: 'right',
+                                        beginAtZero: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Durata (min)'
+                                        },
+                                        grid: {
+                                            drawOnChartArea: false,
+                                        }
+                                    }
+                                }
+                            }} />
                         </div>
                     </div>
                 )}
@@ -609,6 +897,40 @@ const generateInsights = (stats, data) => {
             icon: '🔄',
             title: 'Varietà Esercizi',
             message: 'Prova ad aggiungere più varietà ai tuoi allenamenti.'
+        });
+    }
+
+    // Insight nutrition
+    if (stats.nutritionAdherence >= 80) {
+        insights.push({
+            type: 'success',
+            icon: '🥗',
+            title: 'Ottima Aderenza Dieta!',
+            message: `${stats.nutritionAdherence}% di aderenza alla dieta. Eccellente disciplina!`
+        });
+    } else if (stats.nutritionAdherence < 60) {
+        insights.push({
+            type: 'warning',
+            icon: '🎯',
+            title: 'Migliora l\'Aderenza',
+            message: 'Prova a seguire più costantemente il piano alimentare per risultati ottimali.'
+        });
+    }
+
+    // Insight recovery
+    if (stats.recoverySessionsTotal >= 10) {
+        insights.push({
+            type: 'success',
+            icon: '🛁',
+            title: 'Ottimo Recovery!',
+            message: `${stats.recoverySessionsTotal} sessioni di recupero. Il riposo è fondamentale!`
+        });
+    } else if (stats.recoverySessionsTotal === 0 && stats.totalWorkouts > 5) {
+        insights.push({
+            type: 'info',
+            icon: '🧘',
+            title: 'Aggiungi Recovery',
+            message: 'Considera di integrare pratiche di recupero per migliorare le performance.'
         });
     }
 
