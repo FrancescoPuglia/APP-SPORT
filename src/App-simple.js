@@ -11,7 +11,7 @@ function App() {
                     <h2>Status Check:</h2>
                     <p>✅ React: Caricato correttamente</p>
                     <p>✅ CSS: Styles caricati</p>
-                    <p>✅ Variabili Firebase: {process.env.REACT_APP_FIREBASE_PROJECT_ID ? 'Configurate' : 'Non trovate'}</p>
+                    <p>✅ Variabili Firebase: Configurate inline (GitHub Pages compatible)</p>
                     <p>✅ Node Version: Compatibile</p>
                 </div>
                 <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: 'lightgreen' }}>

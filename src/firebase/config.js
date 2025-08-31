@@ -1,5 +1,5 @@
-// Firebase Configuration - Enterprise Grade Setup
-// Configurazione ottimizzata per performance, sicurezza e scalabilità
+// Firebase Configuration - GitHub Pages Compatible
+// Configurazione inline per GitHub Pages (non supporta variabili .env a runtime)
 
 import { initializeApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';
@@ -7,16 +7,20 @@ import { getFirestore, connectFirestoreEmulator, enableNetwork, disableNetwork }
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 
-// Configurazione Firebase - DA SOSTITUIRE CON I TUOI VALORI REALI
+// Configurazione Firebase - VALORI REALI DA FIREBASE CONSOLE
 const firebaseConfig = {
-    apiKey: process.env.REACT_APP_FIREBASE_API_KEY || "demo-api-key",
-    authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || "extraordinary-growth-app.firebaseapp.com",
-    projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || "extraordinary-growth-app",
-    storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || "extraordinary-growth-app.appspot.com",
-    messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || "123456789",
-    appId: process.env.REACT_APP_FIREBASE_APP_ID || "1:123456789:web:abcdef123456",
-    measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID || "G-XXXXXXXXXX"
+    apiKey: "AIzaSyA733m8k7LZPUO968nt_VFk3M1HTBDIMhc",
+    authDomain: "extraordinary-growth-app.firebaseapp.com",
+    projectId: "extraordinary-growth-app",
+    storageBucket: "extraordinary-growth-app.firebasestorage.app",
+    messagingSenderId: "499496713845",
+    appId: "1:499496713845:web:9994c2c58968900b6e823c",
+    measurementId: "G-186E08D9M1"
 };
+
+// Debug: Verifica che la API key sia corretta
+console.log("🔧 Firebase API Key in uso:", firebaseConfig.apiKey);
+console.log("🔧 Firebase Project ID:", firebaseConfig.projectId);
 
 // Validazione configurazione
 const validateConfig = (config) => {
