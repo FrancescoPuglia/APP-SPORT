@@ -13,8 +13,8 @@ import './styles/main.css';
 
 // Lazy loading per componenti pesanti
 const LazyAnalytics = lazy(() => import('./components/AdvancedAnalytics'));
-const LazyNutritionTracker = lazy(() => import('./components/TestNutrition'));
-const LazyRecoveryTimer = lazy(() => import('./components/TestRecovery'));
+const LazyNutritionTracker = lazy(() => import('./components/SimpleNutritionTracker'));
+const LazyRecoveryTimer = lazy(() => import('./components/SimpleRecoveryTimer'));
 
 // Componente principale con gestione auth e routing
 function AppContent() {
