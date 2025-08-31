@@ -7,17 +7,14 @@ import Nutrition from './components/Nutrition';
 import Supplements from './components/Supplements';
 import Recovery from './components/Recovery';
 import Progress from './components/Progress';
-import AdvancedAnalytics from './components/AdvancedAnalytics';
-import NutritionTracker from './components/NutritionTracker';
-import RecoveryTimer from './components/RecoveryTimer';
 import AuthModal from './components/AuthModal';
 import MigrationModal from './components/MigrationModal';
 import './styles/main.css';
 
 // Lazy loading per componenti pesanti
 const LazyAnalytics = lazy(() => import('./components/AdvancedAnalytics'));
-const LazyNutritionTracker = lazy(() => import('./components/NutritionTracker'));
-const LazyRecoveryTimer = lazy(() => import('./components/RecoveryTimer'));
+const LazyNutritionTracker = lazy(() => import('./components/TestNutrition'));
+const LazyRecoveryTimer = lazy(() => import('./components/TestRecovery'));
 
 // Componente principale con gestione auth e routing
 function AppContent() {
