@@ -2,7 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 // import { AuthProvider, useAuth } from './components/AuthProvider';
 import Dashboard from './components/Dashboard';
-import Workout from './components/Workout';
+import WorkoutSimple from './components/WorkoutSimple';
 import Nutrition from './components/Nutrition';
 import Supplements from './components/Supplements';
 import Recovery from './components/Recovery';
@@ -28,7 +28,7 @@ function AppContent() {
                 {/* Routing principale */}
                 <Routes>
                     <Route path="/" element={<Dashboard />} />
-                    <Route path="/workout" element={<Workout />} />
+                    <Route path="/workout" element={<WorkoutSimple />} />
                     <Route path="/nutrition" element={<Nutrition />} />
                     <Route path="/supplements" element={<Supplements />} />
                     <Route path="/recovery" element={<Recovery />} />

@@ -256,10 +256,10 @@ const Dashboard = () => {
                     <h4>Misurazioni</h4>
                     <p>Peso & corpo</p>
                 </Link>
-                <Link to="/nutrition-tracker" className="action-card nutrition">
+                <Link to="/nutrition" className="action-card nutrition">
                     <span className="action-icon">🥗</span>
                     <h4>Dieta</h4>
-                    <p>Finestra 8-16</p>
+                    <p>Piano settimanale</p>
                 </Link>
                 <Link to="/recovery-timer" className="action-card recovery-timer">
                     <span className="action-icon">🔥</span>

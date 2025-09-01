@@ -1,29 +1,29 @@
 {
   "files": {
     "main.css": "/APP-SPORT/static/css/main.eb9163a4.chunk.css",
-    "main.js": "/APP-SPORT/static/js/main.988d3f64.chunk.js",
-    "main.js.map": "/APP-SPORT/static/js/main.988d3f64.chunk.js.map",
-    "runtime-main.js": "/APP-SPORT/static/js/runtime-main.c177c5c4.js",
-    "runtime-main.js.map": "/APP-SPORT/static/js/runtime-main.c177c5c4.js.map",
-    "static/js/2.822c38fa.chunk.js": "/APP-SPORT/static/js/2.822c38fa.chunk.js",
-    "static/js/2.822c38fa.chunk.js.map": "/APP-SPORT/static/js/2.822c38fa.chunk.js.map",
+    "main.js": "/APP-SPORT/static/js/main.3d1a3534.chunk.js",
+    "main.js.map": "/APP-SPORT/static/js/main.3d1a3534.chunk.js.map",
+    "runtime-main.js": "/APP-SPORT/static/js/runtime-main.6e745e2a.js",
+    "runtime-main.js.map": "/APP-SPORT/static/js/runtime-main.6e745e2a.js.map",
+    "static/js/2.21688fca.chunk.js": "/APP-SPORT/static/js/2.21688fca.chunk.js",
+    "static/js/2.21688fca.chunk.js.map": "/APP-SPORT/static/js/2.21688fca.chunk.js.map",
     "static/js/3.2f8b7020.chunk.js": "/APP-SPORT/static/js/3.2f8b7020.chunk.js",
     "static/js/3.2f8b7020.chunk.js.map": "/APP-SPORT/static/js/3.2f8b7020.chunk.js.map",
-    "static/js/4.17175260.chunk.js": "/APP-SPORT/static/js/4.17175260.chunk.js",
-    "static/js/4.17175260.chunk.js.map": "/APP-SPORT/static/js/4.17175260.chunk.js.map",
+    "static/js/4.a1b46f0c.chunk.js": "/APP-SPORT/static/js/4.a1b46f0c.chunk.js",
+    "static/js/4.a1b46f0c.chunk.js.map": "/APP-SPORT/static/js/4.a1b46f0c.chunk.js.map",
     "static/js/5.145bc038.chunk.js": "/APP-SPORT/static/js/5.145bc038.chunk.js",
     "static/js/5.145bc038.chunk.js.map": "/APP-SPORT/static/js/5.145bc038.chunk.js.map",
     "static/js/6.acb65c91.chunk.js": "/APP-SPORT/static/js/6.acb65c91.chunk.js",
     "static/js/6.acb65c91.chunk.js.map": "/APP-SPORT/static/js/6.acb65c91.chunk.js.map",
     "index.html": "/APP-SPORT/index.html",
     "static/css/main.eb9163a4.chunk.css.map": "/APP-SPORT/static/css/main.eb9163a4.chunk.css.map",
-    "static/js/2.822c38fa.chunk.js.LICENSE.txt": "/APP-SPORT/static/js/2.822c38fa.chunk.js.LICENSE.txt",
+    "static/js/2.21688fca.chunk.js.LICENSE.txt": "/APP-SPORT/static/js/2.21688fca.chunk.js.LICENSE.txt",
     "static/js/3.2f8b7020.chunk.js.LICENSE.txt": "/APP-SPORT/static/js/3.2f8b7020.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
-    "static/js/runtime-main.c177c5c4.js",
-    "static/js/2.822c38fa.chunk.js",
+    "static/js/runtime-main.6e745e2a.js",
+    "static/js/2.21688fca.chunk.js",
     "static/css/main.eb9163a4.chunk.css",
-    "static/js/main.988d3f64.chunk.js"
+    "static/js/main.3d1a3534.chunk.js"
   ]
 }

@@ -1,19 +1,23 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import WorkoutTimer from './WorkoutTimer';
 import ExerciseTracker from './ExerciseTracker';
-import TechniqueGuides from './TechniqueGuides';
-import MotivationalQuotes from './MotivationalQuotes';
 import CalendarStreak from './CalendarStreak';
+import { dataManager } from '../utils/dataManager';
 
 const Workout = () => {
+    const navigate = useNavigate();
     const exerciseHook = ExerciseTracker();
-    const techniqueHook = TechniqueGuides();
-    const quotesHook = MotivationalQuotes();
     const calendarHook = CalendarStreak();
     
     const [selectedDay, setSelectedDay] = React.useState(null);
     const [completedWorkouts, setCompletedWorkouts] = React.useState([]);
     const [selectedExercise, setSelectedExercise] = React.useState(null);
+    const [currentWorkout, setCurrentWorkout] = React.useState({
+        exercises: [],
+        startTime: null,
+        duration: 0
+    });
     const [exerciseForm, setExerciseForm] = React.useState({
         sets: '',
         reps: '',
@@ -22,6 +26,95 @@ const Workout = () => {
         notes: ''
     });
     const [showTechnique, setShowTechnique] = React.useState(false);
+    const [isWorkoutActive, setIsWorkoutActive] = React.useState(false);
+    
+    // FUNZIONE PER INIZIARE WORKOUT
+    const startWorkout = (day) => {
+        setCurrentWorkout({
+            day: day,
+            exercises: [],
+            startTime: Date.now(),
+            duration: 0
+        });
+        setIsWorkoutActive(true);
+        setSelectedDay(day);
+    };
+    
+    // FUNZIONE PER COMPLETARE ESERCIZIO CON PESO
+    const completeExercise = (exercise) => {
+        if (!exerciseForm.weight || !exerciseForm.reps || !exerciseForm.sets) {
+            alert('Inserisci almeno peso, ripetizioni e serie!');
+            return;
+        }
+        
+        const completedExercise = {
+            name: exercise.name,
+            sets: parseInt(exerciseForm.sets),
+            reps: parseInt(exerciseForm.reps),
+            weight: parseFloat(exerciseForm.weight),
+            rir: exerciseForm.rir ? parseInt(exerciseForm.rir) : null,
+            notes: exerciseForm.notes,
+            muscleGroup: getMuscleGroup(exercise.name),
+            completed: true
+        };
+        
+        setCurrentWorkout(prev => ({
+            ...prev,
+            exercises: [...prev.exercises, completedExercise]
+        }));
+        
+        // Reset form
+        setExerciseForm({
+            sets: '',
+            reps: '',
+            weight: '',
+            rir: '',
+            notes: ''
+        });
+        setSelectedExercise(null);
+    };
+    
+    // FUNZIONE PER FINIRE WORKOUT E SALVARLO
+    const finishWorkout = () => {
+        if (currentWorkout.exercises.length === 0) {
+            alert('Aggiungi almeno un esercizio prima di salvare!');
+            return;
+        }
+        
+        const workoutData = {
+            ...currentWorkout,
+            duration: Math.round((Date.now() - currentWorkout.startTime) / 1000 / 60), // minuti
+            type: workoutPlan[currentWorkout.day]?.focus || 'Workout Generico'
+        };
+        
+        // Salva nel dataManager
+        dataManager.saveWorkout(workoutData);
+        
+        // Reset stato
+        setCurrentWorkout({ exercises: [], startTime: null, duration: 0 });
+        setIsWorkoutActive(false);
+        setSelectedDay(null);
+        
+        alert(`Workout salvato! ${workoutData.exercises.length} esercizi completati in ${workoutData.duration} minuti.`);
+    };
+    
+    // FUNZIONE PER DETERMINARE IL GRUPPO MUSCOLARE
+    const getMuscleGroup = (exerciseName) => {
+        const name = exerciseName.toLowerCase();
+        if (name.includes('panca') || name.includes('petto') || name.includes('spinte') || name.includes('croci') || name.includes('dip')) return 'Petto';
+        if (name.includes('curl') || name.includes('bicip')) return 'Bicipiti';
+        if (name.includes('trazione') || name.includes('rematore') || name.includes('dorso') || name.includes('pullover')) return 'Dorso';
+        if (name.includes('tricip') || name.includes('french') || name.includes('pushdown')) return 'Tricipiti';
+        if (name.includes('squat') || name.includes('cosce') || name.includes('quad')) return 'Quadricipiti';
+        if (name.includes('stacco') || name.includes('femorali')) return 'Femorali';
+        if (name.includes('spalla') || name.includes('shoulder') || name.includes('alzate')) return 'Spalle';
+        if (name.includes('polpacci') || name.includes('calf')) return 'Polpacci';
+        return 'Altro';
+    };
+    
+    const isExerciseCompleted = (exerciseName) => {
+        return currentWorkout.exercises.some(ex => ex.name === exerciseName);
+    };
     
     const workoutPlan = {
         'Lunedì': {
