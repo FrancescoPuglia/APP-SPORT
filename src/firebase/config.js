@@ -7,37 +7,20 @@ import { getFirestore, connectFirestoreEmulator, enableNetwork, disableNetwork }
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 
-// Configurazione Firebase - VALORI REALI DA FIREBASE CONSOLE
+// Configurazione Firebase - DEMO/LOCALE
 const firebaseConfig = {
-    apiKey: "AIzaSyA733m8k7LZPOU968nt_VFk3M1HTBDIMhc",
-    authDomain: "extraordinary-growth-app.firebaseapp.com",
-    projectId: "extraordinary-growth-app",
-    storageBucket: "extraordinary-growth-app.appspot.com",
-    messagingSenderId: "499496713845",
-    appId: "1:499496713845:web:9994c2c58968900b6e823c",
-    measurementId: "G-186E08D9M1"
+    apiKey: "demo-key",
+    authDomain: "demo-project.firebaseapp.com",
+    projectId: "demo-project",
+    storageBucket: "demo-project.appspot.com",
+    messagingSenderId: "123456789",
+    appId: "1:123456789:web:demo",
+    measurementId: "G-DEMO"
 };
 
-// Debug: Verifica che la API key sia corretta
-console.log("🔧 Firebase API Key in uso:", firebaseConfig.apiKey);
-console.log("🔧 Firebase Project ID:", firebaseConfig.projectId);
 
-// Validazione configurazione
-const validateConfig = (config) => {
-    const requiredKeys = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
-    const missing = requiredKeys.filter(key => !config[key] || config[key].includes('demo') || config[key].includes('123456'));
-    
-    if (missing.length > 0) {
-        console.warn('🚨 Firebase Config Warning: Alcune chiavi sembrano essere demo values:', missing);
-        console.warn('📋 Per utilizzare Firebase in produzione, sostituisci i valori in .env.local');
-    }
-    
-    return config;
-};
-
-// Inizializzazione app con validazione
-const validatedConfig = validateConfig(firebaseConfig);
-const app = initializeApp(validatedConfig);
+// Inizializzazione app
+const app = initializeApp(firebaseConfig);
 
 // Inizializzazione servizi Firebase
 export const auth = getAuth(app);
