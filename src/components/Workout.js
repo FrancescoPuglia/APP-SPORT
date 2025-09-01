@@ -207,15 +207,42 @@ const Workout = () => {
 
     return (
         <div className="workout-container">
+            {/* HEADER CON BACK BUTTON */}
             <div className="workout-header">
-                <h2>🏋️ Scheda: Fisico della Madonna (6 Mesi)</h2>
-                <p className="program-description">Programma di allenamento avanzato per trasformazione fisica estrema. 
-                   <strong>Split Push/Pull/Legs + Specializzazione</strong> ottimizzato per ipertrofia muscolare.</p>
-                <div className="program-stats">
-                    <span className="stat">📅 6 giorni/settimana</span>
-                    <span className="stat">⏱️ 75-90 min/sessione</span>
-                    <span className="stat">🎯 Volume: Alto</span>
-                    <span className="stat">🔥 Intensità: RIR 1-3</span>
+                <button 
+                    className="back-button"
+                    onClick={() => navigate('/')}
+                    title="Torna alla Dashboard"
+                >
+                    <span className="back-icon">←</span>
+                    <span className="back-text">Dashboard</span>
+                </button>
+                
+                <div className="header-content">
+                    <h2>🏋️ Scheda: Fisico della Madonna (6 Mesi)</h2>
+                    <p className="program-description">Programma di allenamento avanzato per trasformazione fisica estrema. 
+                       <strong>Split Push/Pull/Legs + Specializzazione</strong> ottimizzato per ipertrofia muscolare.</p>
+                    <div className="program-stats">
+                        <span className="stat">📅 6 giorni/settimana</span>
+                        <span className="stat">⏱️ 75-90 min/sessione</span>
+                        <span className="stat">🎯 Volume: Alto</span>
+                        <span className="stat">🔥 Intensità: RIR 1-3</span>
+                    </div>
+                    
+                    {/* STATUS WORKOUT ATTIVO */}
+                    {isWorkoutActive && (
+                        <div className="active-workout-status">
+                            <h3>🔥 Workout in Corso: {currentWorkout.day}</h3>
+                            <p>Esercizi completati: {currentWorkout.exercises.length}</p>
+                            <button 
+                                className="finish-workout-btn"
+                                onClick={finishWorkout}
+                                style={{ background: '#22c55e', color: 'white', padding: '10px 20px', borderRadius: '8px' }}
+                            >
+                                ✅ Termina e Salva Workout
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
             
@@ -239,30 +266,167 @@ const Workout = () => {
                             
                             {selectedDay === day && (
                                 <div className="day-details">
+                                    {/* PULSANTE INIZIO WORKOUT */}
+                                    {!isWorkoutActive && (
+                                        <div className="start-workout-section">
+                                            <button 
+                                                className="start-workout-btn"
+                                                onClick={() => startWorkout(day)}
+                                                style={{ 
+                                                    background: '#ff9500', 
+                                                    color: 'white', 
+                                                    padding: '15px 30px', 
+                                                    borderRadius: '10px',
+                                                    fontSize: '16px',
+                                                    fontWeight: 'bold',
+                                                    width: '100%',
+                                                    marginBottom: '20px'
+                                                }}
+                                            >
+                                                🚀 Inizia Workout - {workout.focus}
+                                            </button>
+                                        </div>
+                                    )}
+
                                     <div className="exercises-list">
                                         {workout.exercises.map((exercise, index) => (
-                                            <div key={index} className="exercise-item">
-                                                <h5>{exercise.name}</h5>
-                                                <div className="exercise-details">
-                                                    <span className="sets">{exercise.sets}</span>
-                                                    <span className="rest">Rest: {exercise.rest}</span>
+                                            <div key={index} className={`exercise-item ${
+                                                isExerciseCompleted(exercise.name) ? 'completed' : ''
+                                            } ${
+                                                selectedExercise === exercise.name ? 'selected' : ''
+                                            }`}>
+                                                <div className="exercise-header" onClick={() => 
+                                                    setSelectedExercise(selectedExercise === exercise.name ? null : exercise.name)
+                                                }>
+                                                    <h5>
+                                                        {isExerciseCompleted(exercise.name) && '✅ '}
+                                                        {exercise.name}
+                                                    </h5>
+                                                    <div className="exercise-details">
+                                                        <span className="sets">{exercise.sets}</span>
+                                                        <span className="rest">Rest: {exercise.rest}</span>
+                                                    </div>
+                                                    <p className="notes">{exercise.notes}</p>
                                                 </div>
-                                                <p className="notes">{exercise.notes}</p>
+                                                
+                                                {/* INTERFACCIA TRACKING PESO */}
+                                                {selectedExercise === exercise.name && isWorkoutActive && (
+                                                    <div className="weight-tracking-interface">
+                                                        <h6>🏋️ Inserisci Dati Allenamento</h6>
+                                                        
+                                                        <div className="tracking-form">
+                                                            <div className="form-row">
+                                                                <div className="form-group">
+                                                                    <label>Serie:</label>
+                                                                    <input 
+                                                                        type="number"
+                                                                        value={exerciseForm.sets}
+                                                                        onChange={(e) => setExerciseForm(prev => ({...prev, sets: e.target.value}))}
+                                                                        placeholder="es. 3"
+                                                                    />
+                                                                </div>
+                                                                <div className="form-group">
+                                                                    <label>Ripetizioni:</label>
+                                                                    <input 
+                                                                        type="number"
+                                                                        value={exerciseForm.reps}
+                                                                        onChange={(e) => setExerciseForm(prev => ({...prev, reps: e.target.value}))}
+                                                                        placeholder="es. 8"
+                                                                    />
+                                                                </div>
+                                                                <div className="form-group">
+                                                                    <label>Peso (kg):</label>
+                                                                    <input 
+                                                                        type="number"
+                                                                        step="0.5"
+                                                                        value={exerciseForm.weight}
+                                                                        onChange={(e) => setExerciseForm(prev => ({...prev, weight: e.target.value}))}
+                                                                        placeholder="es. 80"
+                                                                        style={{ background: '#ff9500', color: 'white' }}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div className="form-row">
+                                                                <div className="form-group">
+                                                                    <label>RIR (opz.):</label>
+                                                                    <select 
+                                                                        value={exerciseForm.rir}
+                                                                        onChange={(e) => setExerciseForm(prev => ({...prev, rir: e.target.value}))}
+                                                                    >
+                                                                        <option value="">-</option>
+                                                                        <option value="0">0 (cedimento)</option>
+                                                                        <option value="1">1</option>
+                                                                        <option value="2">2</option>
+                                                                        <option value="3">3</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div className="form-group full-width">
+                                                                    <label>Note:</label>
+                                                                    <input 
+                                                                        type="text"
+                                                                        value={exerciseForm.notes}
+                                                                        onChange={(e) => setExerciseForm(prev => ({...prev, notes: e.target.value}))}
+                                                                        placeholder="Sensazioni, difficoltà, ecc."
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div className="form-actions">
+                                                                <button 
+                                                                    className="save-exercise-btn"
+                                                                    onClick={() => completeExercise(exercise)}
+                                                                    style={{
+                                                                        background: '#22c55e',
+                                                                        color: 'white',
+                                                                        padding: '10px 20px',
+                                                                        borderRadius: '8px',
+                                                                        width: '100%'
+                                                                    }}
+                                                                >
+                                                                    ✅ Salva Esercizio
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         ))}
                                     </div>
                                     
+                                    {/* PROGRESSO WORKOUT CORRENTE */}
+                                    {isWorkoutActive && currentWorkout.day === day && (
+                                        <div className="workout-progress">
+                                            <h4>🏆 Progresso Workout</h4>
+                                            <div className="progress-stats">
+                                                <span>Esercizi: {currentWorkout.exercises.length}/{workout.exercises.length}</span>
+                                                <span>Completamento: {Math.round((currentWorkout.exercises.length / workout.exercises.length) * 100)}%</span>
+                                            </div>
+                                            
+                                            {currentWorkout.exercises.length > 0 && (
+                                                <div className="completed-exercises">
+                                                    <h5>Esercizi Completati:</h5>
+                                                    {currentWorkout.exercises.map((ex, idx) => (
+                                                        <div key={idx} className="completed-exercise">
+                                                            <span>{ex.name}: {ex.sets}x{ex.reps} @ {ex.weight}kg</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                    
                                     <div className="day-actions">
-                                        {!isWorkoutCompletedToday(day) ? (
+                                        {!isWorkoutCompletedToday(day) && !isWorkoutActive ? (
                                             <button 
                                                 className="button complete-workout-btn"
                                                 onClick={() => markWorkoutCompleted(day)}
                                             >
                                                 ✅ Segna come Completato
                                             </button>
-                                        ) : (
+                                        ) : isWorkoutCompletedToday(day) ? (
                                             <p className="completed-message">💪 Ottimo lavoro! Workout completato oggi.</p>
-                                        )}
+                                        ) : null}
                                     </div>
                                 </div>
                             )}

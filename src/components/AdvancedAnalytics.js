@@ -16,6 +16,7 @@ import {
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval } from 'date-fns';
 import { it } from 'date-fns/locale';
+import { dataManager } from '../utils/dataManager';
 
 ChartJS.register(
     CategoryScale,
@@ -35,8 +36,23 @@ const AdvancedAnalytics = () => {
     const [selectedPeriod, setSelectedPeriod] = useState('3months');
     const [selectedMetric, setSelectedMetric] = useState('weight');
     const [loading, setLoading] = useState(false);
+    const [realData, setRealData] = useState(null);
 
-    // DATI MOCK REALISTICI - ENTERPRISE LEVEL
+    // Carica dati reali dell'utente
+    useEffect(() => {
+        const loadRealData = () => {
+            const data = dataManager.getAnalyticsData();
+            setRealData(data);
+        };
+        
+        loadRealData();
+        
+        // Ricarica ogni 30 secondi per dati aggiornati
+        const interval = setInterval(loadRealData, 30000);
+        return () => clearInterval(interval);
+    }, []);
+
+    // DATI MOCK COME FALLBACK (QUANDO NON CI SONO DATI REALI)
     const mockData = {
         // Dati peso corporeo ultimi 3 mesi
         weightProgress: [
@@ -134,13 +150,36 @@ const AdvancedAnalytics = () => {
         }
     };
 
-    // GRAFICO PROGRESSO PESO
+    // FUNZIONE PER GENERARE DATI REALI O FALLBACK
+    const getChartData = () => {
+        if (realData && realData.measurements && realData.measurements.length > 0) {
+            // USA DATI REALI DELL'UTENTE
+            const measurements = realData.measurements.slice(-30); // Ultimi 30 rilevamenti
+            return {
+                labels: measurements.map(m => format(new Date(m.date), 'dd/MM')),
+                weightData: measurements.map(m => m.weight || 0),
+                muscleMassData: measurements.map(m => m.muscleMass || 0)
+            };
+        } else {
+            // FALLBACK: LINEE PIATTE QUANDO NON CI SONO DATI
+            const emptyLabels = ['No Data', 'Inserisci', 'Misurazioni', 'Reali'];
+            return {
+                labels: emptyLabels,
+                weightData: [0, 0, 0, 0],
+                muscleMassData: [0, 0, 0, 0]
+            };
+        }
+    };
+
+    const chartData = getChartData();
+
+    // GRAFICO PROGRESSO PESO (DATI REALI)
     const weightChartData = {
-        labels: mockData.weightProgress.map(d => format(new Date(d.date), 'dd/MM')),
+        labels: chartData.labels,
         datasets: [
             {
                 label: 'Peso (kg)',
-                data: mockData.weightProgress.map(d => d.weight),
+                data: chartData.weightData,
                 borderColor: '#00ffff',
                 backgroundColor: 'rgba(0, 255, 255, 0.1)',
                 borderWidth: 3,
@@ -153,7 +192,7 @@ const AdvancedAnalytics = () => {
             },
             {
                 label: 'Massa Muscolare (kg)',
-                data: mockData.weightProgress.map(d => d.muscleMass),
+                data: chartData.muscleMassData,
                 borderColor: '#ff9500',
                 backgroundColor: 'rgba(255, 149, 0, 0.1)',
                 borderWidth: 3,
@@ -167,20 +206,49 @@ const AdvancedAnalytics = () => {
         ]
     };
 
-    // GRAFICO VOLUME ALLENAMENTI
+    // FUNZIONE PER DATI WORKOUT REALI
+    const getWorkoutChartData = () => {
+        if (realData && realData.workouts && realData.workouts.length > 0) {
+            // USA DATI REALI DEGLI ALLENAMENTI
+            const workouts = realData.workouts.slice(-10); // Ultimi 10 workout
+            return {
+                labels: workouts.map((w, i) => `Workout ${i + 1}`),
+                volumeData: workouts.map(w => {
+                    if (w.exercises && w.exercises.length > 0) {
+                        return w.exercises.reduce((total, ex) => 
+                            total + (ex.weight * ex.reps * ex.sets), 0
+                        );
+                    }
+                    return 0;
+                }),
+                durationData: workouts.map(w => w.duration || 0)
+            };
+        } else {
+            // FALLBACK: LINEE COSTANTI
+            return {
+                labels: ['Nessun Workout', 'Inserisci', 'Dati', 'Reali'],
+                volumeData: [0, 0, 0, 0],
+                durationData: [0, 0, 0, 0]
+            };
+        }
+    };
+
+    const workoutData = getWorkoutChartData();
+
+    // GRAFICO VOLUME ALLENAMENTI (DATI REALI)
     const workoutChartData = {
-        labels: mockData.workoutData.map(d => d.week),
+        labels: workoutData.labels,
         datasets: [
             {
                 label: 'Volume (kg)',
-                data: mockData.workoutData.map(d => d.volume),
+                data: workoutData.volumeData,
                 backgroundColor: 'rgba(0, 255, 255, 0.8)',
                 borderColor: '#00ffff',
                 borderWidth: 2
             },
             {
                 label: 'Durata (min)',
-                data: mockData.workoutData.map(d => d.duration),
+                data: workoutData.durationData,
                 backgroundColor: 'rgba(255, 149, 0, 0.8)',
                 borderColor: '#ff9500',
                 borderWidth: 2,
@@ -203,12 +271,48 @@ const AdvancedAnalytics = () => {
         }
     };
 
-    // GRAFICO DISTRIBUZIONE MUSCOLI
+    // FUNZIONE PER DISTRIBUZIONE MUSCOLI REALE
+    const getMuscleChartData = () => {
+        if (realData && realData.workouts && realData.workouts.length > 0) {
+            // CALCOLA DISTRIBUZIONE REALE DAI WORKOUT
+            const muscleGroups = {};
+            let totalVolume = 0;
+
+            realData.workouts.forEach(workout => {
+                if (workout.exercises) {
+                    workout.exercises.forEach(exercise => {
+                        const volume = exercise.weight * exercise.reps * exercise.sets;
+                        const muscle = exercise.muscleGroup || 'Altro';
+                        muscleGroups[muscle] = (muscleGroups[muscle] || 0) + volume;
+                        totalVolume += volume;
+                    });
+                }
+            });
+
+            if (totalVolume > 0) {
+                const labels = Object.keys(muscleGroups);
+                const data = labels.map(muscle => 
+                    Math.round((muscleGroups[muscle] / totalVolume) * 100)
+                );
+                return { labels, data };
+            }
+        }
+        
+        // FALLBACK: NESSUN DATO
+        return {
+            labels: ['Nessun Dato', 'Inserisci Workout'],
+            data: [50, 50]
+        };
+    };
+
+    const muscleData = getMuscleChartData();
+
+    // GRAFICO DISTRIBUZIONE MUSCOLI (DATI REALI)
     const muscleChartData = {
-        labels: mockData.muscleGroups.map(m => m.name),
+        labels: muscleData.labels,
         datasets: [
             {
-                data: mockData.muscleGroups.map(m => m.percentage),
+                data: muscleData.data,
                 backgroundColor: [
                     '#00ffff', '#ff9500', '#ff6b6b', '#4ecdc4', 
                     '#45b7d1', '#96ceb4', '#feca57'
@@ -219,20 +323,115 @@ const AdvancedAnalytics = () => {
         ]
     };
 
-    // STATISTICHE CALCOLATE
-    const stats = {
-        totalWorkouts: mockData.workoutData.reduce((sum, w) => sum + w.sessions, 0),
-        totalVolume: mockData.workoutData.reduce((sum, w) => sum + w.volume, 0),
-        avgWorkoutDuration: Math.round(
-            mockData.workoutData.reduce((sum, w) => sum + w.duration, 0) / 
-            mockData.workoutData.reduce((sum, w) => sum + w.sessions, 0)
-        ),
-        weightGain: (mockData.weightProgress[mockData.weightProgress.length - 1].weight - mockData.weightProgress[0].weight).toFixed(1),
-        muscleGain: (mockData.weightProgress[mockData.weightProgress.length - 1].muscleMass - mockData.weightProgress[0].muscleMass).toFixed(1),
-        bodyFatLoss: (mockData.weightProgress[0].bodyFat - mockData.weightProgress[mockData.weightProgress.length - 1].bodyFat).toFixed(1),
-        currentStreak: 12,
-        bestLift: mockData.exerciseProgress.reduce((max, ex) => ex.current > max ? ex.current : max, 0)
+    // STATISTICHE CALCOLATE (DATI REALI)
+    const stats = realData ? {
+        totalWorkouts: realData.stats.totalWorkouts || 0,
+        currentStreak: realData.stats.currentStreak || 0,
+        totalVolume: workoutData.volumeData.reduce((sum, vol) => sum + vol, 0),
+        avgWorkoutDuration: workoutData.durationData.length > 0 ? 
+            Math.round(workoutData.durationData.reduce((sum, dur) => sum + dur, 0) / workoutData.durationData.length) : 0,
+        weightGain: realData.stats.weightProgress ? realData.stats.weightProgress.change : '0.0',
+        muscleGain: chartData.muscleMassData.length > 1 ? 
+            (chartData.muscleMassData[chartData.muscleMassData.length - 1] - chartData.muscleMassData[0]).toFixed(1) : '0.0',
+        bodyFatLoss: '0.0',
+        nutritionAdherence: Math.round(realData.stats.nutritionAdherence || 0),
+        supplementCompliance: realData.stats.supplementCompliance || 0,
+        recoveryFrequency: realData.stats.recoveryFrequency || 0,
+        bestLift: realData.stats.strengthProgress ? 
+            Math.max(...Object.values(realData.stats.strengthProgress).map(ex => ex.currentWeight || 0)) : 0
+    } : {
+        // FALLBACK QUANDO NON CI SONO DATI
+        totalWorkouts: 0,
+        currentStreak: 0,
+        totalVolume: 0,
+        avgWorkoutDuration: 0,
+        weightGain: '0.0',
+        muscleGain: '0.0',
+        bodyFatLoss: '0.0',
+        nutritionAdherence: 0,
+        supplementCompliance: 0,
+        recoveryFrequency: 0,
+        bestLift: 0
     };
+
+    // GENERA INSIGHTS DINAMICI BASATI SUI DATI REALI
+    const generateInsights = () => {
+        if (!realData) {
+            return [{
+                type: 'info',
+                icon: '📊',
+                title: 'Inizia il Tracking',
+                message: 'Aggiungi dati ai tuoi allenamenti per ricevere insights personalizzati!'
+            }];
+        }
+
+        const insights = [];
+
+        // Insight su workout streak
+        if (stats.currentStreak >= 7) {
+            insights.push({
+                type: 'success',
+                icon: '🔥',
+                title: 'Streak Fantastico!',
+                message: `${stats.currentStreak} giorni consecutivi! La costanza è la chiave del successo.`
+            });
+        } else if (stats.totalWorkouts > 0) {
+            insights.push({
+                type: 'warning',
+                icon: '⚡',
+                title: 'Mantieni la Costanza',
+                message: 'Cerca di allenarti regolarmente per massimizzare i risultati.'
+            });
+        }
+
+        // Insight su nutrizione
+        if (stats.nutritionAdherence >= 80) {
+            insights.push({
+                type: 'success',
+                icon: '🥗',
+                title: 'Nutrizione Eccellente',
+                message: `${stats.nutritionAdherence}% di aderenza alla dieta. Ottimo lavoro!`
+            });
+        } else if (stats.nutritionAdherence > 0) {
+            insights.push({
+                type: 'warning',
+                icon: '🍽️',
+                title: 'Migliora la Nutrizione',
+                message: 'Completa più pasti per raggiungere i tuoi obiettivi più velocemente.'
+            });
+        }
+
+        // Insight su progressi forza
+        if (realData.stats.strengthProgress && Object.keys(realData.stats.strengthProgress).length > 0) {
+            const improvements = Object.values(realData.stats.strengthProgress)
+                .map(ex => parseFloat(ex.improvement || 0))
+                .filter(imp => imp > 0);
+            
+            if (improvements.length > 0) {
+                const avgImprovement = improvements.reduce((sum, imp) => sum + imp, 0) / improvements.length;
+                insights.push({
+                    type: 'success',
+                    icon: '💪',
+                    title: 'Progressi di Forza',
+                    message: `Miglioramento medio del ${avgImprovement.toFixed(1)}% sui tuoi esercizi!`
+                });
+            }
+        }
+
+        // Fallback se non ci sono insights specifici
+        if (insights.length === 0) {
+            insights.push({
+                type: 'info',
+                icon: '🚀',
+                title: 'Continua Così',
+                message: 'Mantieni la disciplina e i risultati arriveranno!'
+            });
+        }
+
+        return insights.slice(0, 3); // Massimo 3 insights
+    };
+
+    const dynamicInsights = generateInsights();
 
     return (
         <div className="analytics-premium">
@@ -336,7 +535,7 @@ const AdvancedAnalytics = () => {
                     <div className="chart-header">
                         <h3>🏋️ VOLUME & DURATA ALLENAMENTI</h3>
                         <div className="chart-stats">
-                            <span>Volume Medio: {Math.round(stats.totalVolume / mockData.workoutData.length)}kg</span>
+                            <span>Volume Medio: {workoutData.volumeData.length > 0 ? Math.round(stats.totalVolume / workoutData.volumeData.length) : 0}kg</span>
                         </div>
                     </div>
                     <div className="chart-wrapper">
@@ -358,56 +557,67 @@ const AdvancedAnalytics = () => {
                 </div>
             </div>
 
-            {/* PERFORMANCE ESERCIZI */}
+            {/* PERFORMANCE ESERCIZI (DATI REALI) */}
             <div className="exercises-performance">
                 <h3>🏆 TOP PERFORMANCE ESERCIZI</h3>
                 <div className="exercises-grid">
-                    {mockData.exerciseProgress.map((exercise, index) => (
-                        <div key={index} className="exercise-card">
-                            <div className="exercise-header">
-                                <h4>{exercise.exercise}</h4>
-                                <span className="improvement">+{exercise.improvement}%</span>
-                            </div>
-                            <div className="exercise-progress">
-                                <div className="progress-bar">
-                                    <div 
-                                        className="progress-fill"
-                                        style={{ width: `${(exercise.current / 200) * 100}%` }}
-                                    ></div>
+                    {realData && realData.stats.strengthProgress ? 
+                        Object.entries(realData.stats.strengthProgress).map(([exerciseName, data], index) => (
+                            <div key={index} className="exercise-card">
+                                <div className="exercise-header">
+                                    <h4>{exerciseName}</h4>
+                                    <span className="improvement">+{data.improvement || 0}%</span>
                                 </div>
-                                <div className="exercise-stats">
-                                    <span>Attuale: <strong>{exercise.current}kg</strong></span>
-                                    <span>Inizio: {exercise.start}kg</span>
+                                <div className="exercise-progress">
+                                    <div className="progress-bar">
+                                        <div 
+                                            className="progress-fill"
+                                            style={{ width: `${Math.min((data.currentWeight / 200) * 100, 100)}%` }}
+                                        ></div>
+                                    </div>
+                                    <div className="exercise-stats">
+                                        <span>Attuale: <strong>{data.currentWeight || 0}kg</strong></span>
+                                        <span>Inizio: {data.initialWeight || 0}kg</span>
+                                    </div>
                                 </div>
                             </div>
+                        ))
+                        : 
+                        <div className="no-data-message">
+                            <h4>🏋️ Nessun Dato Disponibile</h4>
+                            <p>Aggiungi workout con pesi per vedere i progressi di forza</p>
                         </div>
-                    ))}
+                    }
                 </div>
             </div>
 
             {/* NUTRITION & RECOVERY STATS */}
             <div className="secondary-stats">
                 <div className="stat-section">
-                    <h3>🥗 NUTRITION INSIGHTS</h3>
+                    <h3>🥗 NUTRITION INSIGHTS (DATI REALI)</h3>
                     <div className="stat-cards">
                         <div className="stat-card">
                             <div className="stat-icon">💪</div>
                             <div className="stat-info">
-                                <span className="stat-value">{mockData.nutritionStats.avgProteinDaily}g</span>
+                                <span className="stat-value">{realData?.nutrition?.weeklyAdherence ? 
+                                    Math.round(realData.nutrition.weeklyAdherence.reduce((sum, day) => sum + (day.mealsCompleted * 25), 0) / 7) 
+                                    : 0}g</span>
                                 <span className="stat-label">Proteine/Giorno</span>
                             </div>
                         </div>
                         <div className="stat-card">
                             <div className="stat-icon">🔥</div>
                             <div className="stat-info">
-                                <span className="stat-value">{mockData.nutritionStats.avgCaloriesDaily}</span>
+                                <span className="stat-value">{realData?.nutrition?.weeklyAdherence ? 
+                                    Math.round(realData.nutrition.weeklyAdherence.reduce((sum, day) => sum + (day.mealsCompleted * 500), 0) / 7)
+                                    : 0}</span>
                                 <span className="stat-label">Calorie/Giorno</span>
                             </div>
                         </div>
                         <div className="stat-card">
                             <div className="stat-icon">📊</div>
                             <div className="stat-info">
-                                <span className="stat-value">{mockData.nutritionStats.adherenceRate}%</span>
+                                <span className="stat-value">{stats.nutritionAdherence}%</span>
                                 <span className="stat-label">Aderenza Dieta</span>
                             </div>
                         </div>
@@ -415,47 +625,62 @@ const AdvancedAnalytics = () => {
                 </div>
 
                 <div className="stat-section">
-                    <h3>🛁 RECOVERY INSIGHTS</h3>
+                    <h3>🛁 RECOVERY INSIGHTS (DATI REALI)</h3>
                     <div className="recovery-list">
-                        {mockData.recoveryData.slice(0, 4).map((session, index) => (
-                            <div key={index} className="recovery-item">
-                                <div className="recovery-type">{session.type}</div>
-                                <div className="recovery-duration">{session.duration}min</div>
-                                <div className="recovery-quality">
-                                    {'★'.repeat(Math.floor(session.quality / 2))}
+                        {realData && realData.recovery && realData.recovery.length > 0 ? 
+                            realData.recovery.slice(0, 4).map((session, index) => (
+                                <div key={index} className="recovery-item">
+                                    <div className="recovery-type">{session.type || 'Sessione'}</div>
+                                    <div className="recovery-duration">{session.duration || 0}min</div>
+                                    <div className="recovery-quality">
+                                        {'★'.repeat(Math.floor((session.quality || 5) / 2))}
+                                    </div>
                                 </div>
+                            ))
+                            :
+                            <div className="no-recovery-data">
+                                <p>🛁 Nessuna sessione recovery registrata</p>
+                                <small>Usa la sezione Recovery per tracciare le tue sessioni</small>
                             </div>
-                        ))}
+                        }
                     </div>
                 </div>
             </div>
 
-            {/* INSIGHTS AI */}
+            {/* INSIGHTS AI DINAMICI */}
             <div className="ai-insights">
-                <h3>🤖 AI INSIGHTS & RACCOMANDAZIONI</h3>
+                <h3>🤖 AI INSIGHTS & RACCOMANDAZIONI (BASATE SUI TUOI DATI)</h3>
                 <div className="insights-grid">
-                    <div className="insight-card success">
-                        <div className="insight-icon">🎯</div>
-                        <div className="insight-content">
-                            <h4>Eccellente Progressione</h4>
-                            <p>Il tuo aumento di massa muscolare è sopra la media! Continua con questo ritmo.</p>
+                    {dynamicInsights.map((insight, index) => (
+                        <div key={index} className={`insight-card ${insight.type}`}>
+                            <div className="insight-icon">{insight.icon}</div>
+                            <div className="insight-content">
+                                <h4>{insight.title}</h4>
+                                <p>{insight.message}</p>
+                            </div>
                         </div>
-                    </div>
-                    <div className="insight-card warning">
-                        <div className="insight-icon">⚡</div>
-                        <div className="insight-content">
-                            <h4>Aumenta Volume Gambe</h4>
-                            <p>Le gambe rappresentano solo il 15% del volume. Considera di aggiungere una sessione.</p>
-                        </div>
-                    </div>
-                    <div className="insight-card info">
-                        <div className="insight-icon">🏆</div>
-                        <div className="insight-content">
-                            <h4>Recovery Ottimale</h4>
-                            <p>Le tue sessioni di recupero sono bilanciate. Perfetto equilibrio allenamento-riposo!</p>
-                        </div>
-                    </div>
+                    ))}
                 </div>
+            </div>
+
+            {/* MESSAGGIO DATI REALI */}
+            <div className="data-status" style={{
+                padding: '20px',
+                background: realData ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                borderRadius: '10px',
+                textAlign: 'center',
+                marginTop: '20px',
+                border: `2px solid ${realData ? '#22c55e' : '#ef4444'}`
+            }}>
+                <h3 style={{ color: realData ? '#22c55e' : '#ef4444' }}>
+                    {realData ? '✅ ANALYTICS REALI ATTIVI' : '⚠️ NESSUN DATO DISPONIBILE'}
+                </h3>
+                <p style={{ color: realData ? '#22c55e' : '#ef4444' }}>
+                    {realData ? 
+                        'Tutti i grafici e le statistiche sono basati sui tuoi dati reali!' :
+                        'Aggiungi workout, misurazioni e completa pasti per vedere analytics reali.'
+                    }
+                </p>
             </div>
         </div>
     );

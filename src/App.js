@@ -7,6 +7,7 @@ import Nutrition from './components/Nutrition';
 import Supplements from './components/Supplements';
 import Recovery from './components/Recovery';
 import Progress from './components/Progress';
+import Measurements from './components/Measurements';
 import AuthModal from './components/AuthModal';
 import MigrationModal from './components/MigrationModal';
 import './styles/main.css';
@@ -32,6 +33,7 @@ function AppContent() {
                     <Route path="/supplements" element={<Supplements />} />
                     <Route path="/recovery" element={<Recovery />} />
                     <Route path="/progress" element={<Progress />} />
+                    <Route path="/measurements" element={<Measurements />} />
                     <Route path="/analytics" element={
                         <Suspense fallback={<div className="loading-analytics">Caricamento Analytics...</div>}>
                             <LazyAnalytics />

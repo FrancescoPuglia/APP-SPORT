@@ -251,6 +251,11 @@ const Dashboard = () => {
                     <h4>Progressi</h4>
                     <p>Traccia misure</p>
                 </Link>
+                <Link to="/measurements" className="action-card measurements">
+                    <span className="action-icon">📏</span>
+                    <h4>Misurazioni</h4>
+                    <p>Peso & corpo</p>
+                </Link>
                 <Link to="/nutrition-tracker" className="action-card nutrition">
                     <span className="action-icon">🥗</span>
                     <h4>Dieta</h4>
