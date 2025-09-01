@@ -3,7 +3,7 @@ import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 // import { AuthProvider, useAuth } from './components/AuthProvider';
 import Dashboard from './components/Dashboard';
 import WorkoutSimple from './components/WorkoutSimple';
-import Nutrition from './components/Nutrition';
+import NutritionBella from './components/NutritionBella';
 import Supplements from './components/Supplements';
 import Recovery from './components/Recovery';
 import Progress from './components/Progress';
@@ -29,7 +29,7 @@ function AppContent() {
                 <Routes>
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/workout" element={<WorkoutSimple />} />
-                    <Route path="/nutrition" element={<Nutrition />} />
+                    <Route path="/nutrition" element={<NutritionBella />} />
                     <Route path="/supplements" element={<Supplements />} />
                     <Route path="/recovery" element={<Recovery />} />
                     <Route path="/progress" element={<Progress />} />
