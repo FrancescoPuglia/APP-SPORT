@@ -9,10 +9,10 @@ import { getAnalytics, isSupported } from 'firebase/analytics';
 
 // Configurazione Firebase - VALORI REALI DA FIREBASE CONSOLE
 const firebaseConfig = {
-    apiKey: "AIzaSyA733m8k7LZPUO968nt_VFk3M1HTBDIMhc",
+    apiKey: "AIzaSyA733m8k7LZPOU968nt_VFk3M1HTBDIMhc",
     authDomain: "extraordinary-growth-app.firebaseapp.com",
     projectId: "extraordinary-growth-app",
-    storageBucket: "extraordinary-growth-app.firebasestorage.app",
+    storageBucket: "extraordinary-growth-app.appspot.com",
     messagingSenderId: "499496713845",
     appId: "1:499496713845:web:9994c2c58968900b6e823c",
     measurementId: "G-186E08D9M1"
