@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { nutritionRepo } from '../firebase/firestore';
-import { useAuth } from './AuthProvider';
+// import { useAuth } from './AuthProvider';
 import { logger } from '../firebase/config';
 
 // Struttura dieta settimanale basata sulla dieta fornita
@@ -270,7 +270,7 @@ const MEAL_TYPES = [
 ];
 
 const NutritionTracker = () => {
-    const { user } = useAuth();
+    // const { user } = useAuth();
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [weekDays, setWeekDays] = useState([]);
     const [dailyMeals, setDailyMeals] = useState({});

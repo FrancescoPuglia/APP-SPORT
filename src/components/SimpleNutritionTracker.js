@@ -1,9 +1,9 @@
 // Simplified Nutrition Tracker - Debug version
 import React, { useState } from 'react';
-import { useAuth } from './AuthProvider';
+// import { useAuth } from './AuthProvider';
 
 const SimpleNutritionTracker = () => {
-    const { user } = useAuth();
+    // const { user } = useAuth();
     const [selectedMeals, setSelectedMeals] = useState({});
 
     const MEALS = [
@@ -26,16 +26,7 @@ const SimpleNutritionTracker = () => {
         return selectedMeals[`${day}-${mealId}`] || false;
     };
 
-    if (!user) {
-        return (
-            <div className="nutrition-tracker">
-                <div className="auth-required">
-                    <h2>🔐 Login Richiesto</h2>
-                    <p>Effettua il login per usare il nutrition tracker</p>
-                </div>
-            </div>
-        );
-    }
+    // Autenticazione disabilitata
 
     return (
         <div className="nutrition-tracker">

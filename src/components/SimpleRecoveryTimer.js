@@ -1,9 +1,9 @@
 // Simplified Recovery Timer - Debug version
 import React, { useState, useEffect } from 'react';
-import { useAuth } from './AuthProvider';
+// import { useAuth } from './AuthProvider';
 
 const SimpleRecoveryTimer = () => {
-    const { user } = useAuth();
+    // const { user } = useAuth();
     const [selectedActivity, setSelectedActivity] = useState('sauna');
     const [isRunning, setIsRunning] = useState(false);
     const [time, setTime] = useState(0);
@@ -41,16 +41,7 @@ const SimpleRecoveryTimer = () => {
         return Math.min((time / targetSeconds) * 100, 100);
     };
 
-    if (!user) {
-        return (
-            <div className="recovery-timer">
-                <div className="auth-required">
-                    <h2>🔐 Login Richiesto</h2>
-                    <p>Effettua il login per usare il recovery timer</p>
-                </div>
-            </div>
-        );
-    }
+    // Autenticazione disabilitata
 
     return (
         <div className="recovery-timer">

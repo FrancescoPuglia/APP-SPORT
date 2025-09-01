@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider, useAuth } from './components/AuthProvider';
+// import { AuthProvider, useAuth } from './components/AuthProvider';
 import Dashboard from './components/Dashboard';
 import Workout from './components/Workout';
 import Nutrition from './components/Nutrition';
@@ -16,46 +16,13 @@ const LazyAnalytics = lazy(() => import('./components/AdvancedAnalytics'));
 const LazyNutritionTracker = lazy(() => import('./components/SimpleNutritionTracker'));
 const LazyRecoveryTimer = lazy(() => import('./components/SimpleRecoveryTimer'));
 
-// Componente principale con gestione auth e routing
+// Componente principale senza autenticazione
 function AppContent() {
-    const { user, loading, error, migrationStatus } = useAuth();
-
-    // Loading spinner durante inizializzazione
-    if (loading) {
-        return (
-            <div className="app-loading">
-                <div className="loading-container">
-                    <div className="loading-spinner"></div>
-                    <h2>🏋️ Extraordinary Growth</h2>
-                    <p>Caricamento in corso...</p>
-                </div>
-            </div>
-        );
-    }
-
-    // Mostra errore se presente
-    if (error) {
-        return (
-            <div className="app-error">
-                <div className="error-container">
-                    <h2>⚠️ Errore</h2>
-                    <p>{error}</p>
-                    <button onClick={() => window.location.reload()}>
-                        Ricarica Pagina
-                    </button>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <Router>
             <div className="App">
-                {/* Modale autenticazione se utente non loggato */}
-                {!user && <AuthModal />}
-                
-                {/* Modale migrazione se necessaria */}
-                {user && migrationStatus.isRequired && <MigrationModal />}
+                {/* Autenticazione disabilitata per uso locale */}
                 
                 {/* Routing principale */}
                 <Routes>
@@ -86,13 +53,9 @@ function AppContent() {
     );
 }
 
-// App wrapper con AuthProvider
+// App wrapper senza autenticazione
 function App() {
-    return (
-        <AuthProvider>
-            <AppContent />
-        </AuthProvider>
-    );
+    return <AppContent />;
 }
 
 export default App;

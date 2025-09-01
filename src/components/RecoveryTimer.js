@@ -5,7 +5,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { recoveryRepo } from '../firebase/firestore';
-import { useAuth } from './AuthProvider';
+// import { useAuth } from './AuthProvider';
 import { logger } from '../firebase/config';
 
 // Benefici e informazioni per ogni pratica recovery
@@ -228,7 +228,7 @@ const RECOVERY_ACTIVITIES = {
 };
 
 const RecoveryTimer = () => {
-    const { user } = useAuth();
+    // const { user } = useAuth();
     const [selectedActivity, setSelectedActivity] = useState('sauna');
     const [isRunning, setIsRunning] = useState(false);
     const [time, setTime] = useState(0); // in secondi

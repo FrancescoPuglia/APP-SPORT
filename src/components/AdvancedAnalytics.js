@@ -20,7 +20,7 @@ import { format, subDays, startOfWeek, endOfWeek, eachDayOfInterval } from 'date
 import { it } from 'date-fns/locale';
 
 import { progressRepo, workoutRepo, exerciseRepo, nutritionRepo, recoveryRepo } from '../firebase/firestore';
-import { useAuth } from './AuthProvider';
+// import { useAuth } from './AuthProvider';
 import { logger } from '../firebase/config';
 
 // Registrazione componenti Chart.js
@@ -38,7 +38,7 @@ ChartJS.register(
 );
 
 const AdvancedAnalytics = () => {
-    const { user } = useAuth();
+    // const { user } = useAuth();
     const [analyticsData, setAnalyticsData] = useState({
         progress: [],
         workouts: [],
@@ -52,7 +52,7 @@ const AdvancedAnalytics = () => {
 
     // Carica tutti i dati per analytics
     useEffect(() => {
-        if (!user) return;
+        // if (!user) return;
         loadAnalyticsData();
     }, [user, selectedPeriod]);
 
