@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/APP-SPORT/static/css/main.eb9163a4.chunk.css",
-    "main.js": "/APP-SPORT/static/js/main.9492072d.chunk.js",
-    "main.js.map": "/APP-SPORT/static/js/main.9492072d.chunk.js.map",
+    "main.js": "/APP-SPORT/static/js/main.af7b6e7c.chunk.js",
+    "main.js.map": "/APP-SPORT/static/js/main.af7b6e7c.chunk.js.map",
     "runtime-main.js": "/APP-SPORT/static/js/runtime-main.6e745e2a.js",
     "runtime-main.js.map": "/APP-SPORT/static/js/runtime-main.6e745e2a.js.map",
     "static/js/2.21688fca.chunk.js": "/APP-SPORT/static/js/2.21688fca.chunk.js",
@@ -24,6 +24,6 @@
     "static/js/runtime-main.6e745e2a.js",
     "static/js/2.21688fca.chunk.js",
     "static/css/main.eb9163a4.chunk.css",
-    "static/js/main.9492072d.chunk.js"
+    "static/js/main.af7b6e7c.chunk.js"
   ]
 }

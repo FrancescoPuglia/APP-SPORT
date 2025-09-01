@@ -112,6 +112,54 @@ const Dashboard = () => {
         return `${hours}h ${mins}m`;
     };
     
+    // FUNZIONI PER IL CALENDARIO COMPLETO
+    const generateFullCalendar = () => {
+        const today = new Date();
+        const currentMonth = today.getMonth();
+        const currentYear = today.getFullYear();
+        const firstDay = new Date(currentYear, currentMonth, 1);
+        const lastDay = new Date(currentYear, currentMonth + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        const startingDay = firstDay.getDay();
+        
+        const calendar = [];
+        
+        // Giorni vuoti all'inizio
+        for (let i = 0; i < startingDay; i++) {
+            calendar.push(null);
+        }
+        
+        // Giorni del mese
+        for (let day = 1; day <= daysInMonth; day++) {
+            calendar.push(day);
+        }
+        
+        return calendar;
+    };
+
+    const isToday = (day) => {
+        const today = new Date();
+        return day === today.getDate();
+    };
+
+    const isDayCompleted = (day) => {
+        if (!day) return false;
+        // Simula giorni completati basati su workout sessions
+        const completedWorkouts = JSON.parse(localStorage.getItem('workoutSessions') || '[]');
+        const date = new Date();
+        date.setDate(day);
+        const dayString = date.toDateString();
+        
+        return completedWorkouts.some(workout => 
+            new Date(workout.date).toDateString() === dayString
+        );
+    };
+    
+    const getNutritionStreak = () => {
+        const saved = localStorage.getItem('nutritionStreak');
+        return saved ? parseInt(saved) : 0;
+    };
+    
     const todayQuote = quotesHook.getTodayQuote();
     const todayProgress = exerciseHook.getTodayProgress(todayWorkout?.exercises);
     const supplementProgress = supplementsHook.getSupplementProgress();
@@ -164,26 +212,103 @@ const Dashboard = () => {
                 </Link>
             </div>
 
-            {/* STREAK CALENDAR */}
-            <div className="streak-calendar-mini">
-                <h3>📅 Calendario Streak</h3>
-                <div className="calendar-grid">
-                    {calendarHook.getDaysInMonth(calendarHook.currentDate).slice(-7).map((day, index) => (
-                        <div key={index} className={`calendar-day-mini ${
-                            day?.isCompleted ? 'completed' : day?.isToday ? 'today' : ''
-                        }`}>
-                            <span className="day-number">{day?.day || ''}</span>
-                            {day?.isCompleted && <span className="workout-emoji">{calendarHook.getWorkoutTypeEmoji(day.workoutType)}</span>}
+            {/* CALENDARIO COMPLETO CON STREAK */}
+            <div style={{
+                background: 'linear-gradient(135deg, #2d2d2d 0%, #3d3d3d 100%)',
+                borderRadius: '20px',
+                padding: '30px',
+                margin: '30px 0',
+                boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)'
+            }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
+                    <h2 style={{ 
+                        fontSize: '1.8rem',
+                        color: '#ff9500',
+                        margin: 0
+                    }}>
+                        📅 {new Date().toLocaleDateString('it-IT', { month: 'long', year: 'numeric' }).toUpperCase()}
+                    </h2>
+                    
+                    {/* STREAK COUNTER PROMINENTE */}
+                    <div style={{
+                        background: 'linear-gradient(135deg, #ff9500 0%, #ff6b35 100%)',
+                        padding: '20px',
+                        borderRadius: '20px',
+                        textAlign: 'center',
+                        boxShadow: '0 5px 15px rgba(255, 149, 0, 0.3)',
+                        minWidth: '120px'
+                    }}>
+                        <div style={{ fontSize: '2rem', marginBottom: '8px' }}>🔥</div>
+                        <div style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '5px', color: 'white' }}>
+                            {Math.max(dashboardData.currentStreak, getNutritionStreak())}
+                        </div>
+                        <div style={{ fontSize: '0.9rem', color: 'white', opacity: 0.9 }}>STREAK</div>
+                    </div>
+                </div>
+                
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(7, 1fr)',
+                    gap: '10px',
+                    marginBottom: '20px'
+                }}>
+                    {['DOM', 'LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB'].map(day => (
+                        <div key={day} style={{
+                            padding: '10px',
+                            textAlign: 'center',
+                            fontWeight: 'bold',
+                            color: '#ff9500',
+                            fontSize: '0.9rem'
+                        }}>
+                            {day}
+                        </div>
+                    ))}
+                    
+                    {generateFullCalendar().map((day, index) => (
+                        <div key={index} style={{
+                            padding: '12px',
+                            textAlign: 'center',
+                            borderRadius: '10px',
+                            cursor: day ? 'pointer' : 'default',
+                            background: day ? (
+                                isToday(day) ? '#ff9500' :
+                                isDayCompleted(day) ? '#22c55e' : 
+                                'rgba(255, 255, 255, 0.05)'
+                            ) : 'transparent',
+                            color: day ? (
+                                isToday(day) || isDayCompleted(day) ? 'white' : '#ccc'
+                            ) : 'transparent',
+                            fontWeight: isToday(day) ? 'bold' : 'normal',
+                            border: isToday(day) ? '2px solid white' : '1px solid transparent',
+                            transform: isToday(day) ? 'scale(1.1)' : 'scale(1)',
+                            transition: 'all 0.3s ease',
+                            fontSize: '0.9rem'
+                        }}>
+                            {day}
+                            {isDayCompleted(day) && !isToday(day) && (
+                                <div style={{ fontSize: '0.7rem', marginTop: '2px' }}>✅</div>
+                            )}
+                            {isToday(day) && (
+                                <div style={{ fontSize: '0.6rem', marginTop: '2px' }}>OGGI</div>
+                            )}
                         </div>
                     ))}
                 </div>
-                <div className="streak-stats">
-                    <span className="current-streak" style={{color: calendarHook.getStreakColor(dashboardData.currentStreak)}}>
-                        🔥 {dashboardData.currentStreak} giorni
-                    </span>
-                    <span className="monthly-total">
-                        📊 {calendarHook.monthlyStats.monthlyWorkouts || 0} questo mese
-                    </span>
+                
+                <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    background: 'rgba(255, 149, 0, 0.1)',
+                    padding: '15px 20px',
+                    borderRadius: '15px'
+                }}>
+                    <div style={{ color: '#aaa', fontSize: '0.9rem' }}>
+                        🟠 Oggi • 🟢 Giorno completato • ⚪ Da completare
+                    </div>
+                    <div style={{ color: '#ff9500', fontWeight: 'bold' }}>
+                        📊 {calendarHook.monthlyStats?.monthlyWorkouts || 0} workout questo mese
+                    </div>
                 </div>
             </div>
 
