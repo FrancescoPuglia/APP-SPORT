@@ -13,47 +13,47 @@ const NutritionBella = () => {
         return saved ? parseInt(saved) : 0;
     });
 
-    // DIETA SETTIMANALE COMPLETA - 7 GIORNI CON GRAFICA BELLA
+    // TUA DIETA PERSONALIZZATA - 7 GIORNI
     const weeklyDiet = {
         0: { // Domenica
             name: "🔥 DOMENICA - RECOVERY DAY",
             color: "#ff6b6b",
             meals: [
                 {
+                    id: "dom-idratazione",
+                    type: "💧 Idratazione & Primer",
+                    time: "7:00",
+                    food: "Morning Detox Protocol",
+                    proteins: 2,
+                    calories: 15,
+                    ingredients: ["Acqua tiepida + limone + sale", "Stabilium", "Spremuta melograno (opz)"]
+                },
+                {
                     id: "dom-colazione",
                     type: "🌅 Colazione",
                     time: "8:00",
-                    food: "Pancakes proteici con mirtilli",
-                    proteins: 28,
-                    calories: 420,
-                    ingredients: ["3 uova", "50g farina avena", "1 scoop whey", "100g mirtilli"]
+                    food: "Omelette funzionale con superfood",
+                    proteins: 32,
+                    calories: 485,
+                    ingredients: ["3 uova + 3 albumi", "spinaci + aglio", "1 cucchiaio EVOO", "1/4 avocado", "porridge quinoa + latte mandorla", "mirtilli + semi chia", "GOS + inulina + cacao 6g + cannella"]
                 },
                 {
                     id: "dom-pranzo",
                     type: "🍽️ Pranzo",
-                    time: "13:00",
-                    food: "Salmone grigliato con riso basmati",
-                    proteins: 35,
-                    calories: 580,
-                    ingredients: ["150g salmone", "80g riso", "1/2 avocado", "verdure miste"]
+                    time: "12:30",
+                    food: "Tacchino curry con superfood bowl",
+                    proteins: 42,
+                    calories: 680,
+                    ingredients: ["200g tacchino al curry", "curcuma/pepe + zenzero", "100g riso integrale", "aceto mele prima", "cavolini/broccoli + EVOO", "semi di zucca + fermentati", "150g legumi"]
                 },
                 {
                     id: "dom-snack",
-                    type: "🥤 Snack",
-                    time: "16:30",
-                    food: "Smoothie proteico alla banana",
-                    proteins: 25,
-                    calories: 380,
-                    ingredients: ["1 scoop whey", "1 banana", "20g burro arachidi", "250ml latte"]
-                },
-                {
-                    id: "dom-cena",
-                    type: "🌙 Cena",
-                    time: "20:00",
-                    food: "Petto di pollo con patate dolci",
-                    proteins: 40,
-                    calories: 520,
-                    ingredients: ["180g petto pollo", "200g patate dolci", "150g broccoli"]
+                    type: "💪 Snack/Post-WO",
+                    time: "15:30",
+                    food: "Shake vegano con cacao",
+                    proteins: 28,
+                    calories: 350,
+                    ingredients: ["shake veg + spinaci", "fragole + burro mandorle", "cacao 6g", "2 quadretti fondente 90%"]
                 }
             ]
         },
@@ -62,49 +62,40 @@ const NutritionBella = () => {
             color: "#ff9500",
             meals: [
                 {
+                    id: "lun-idratazione",
+                    type: "💧 Idratazione & Primer",
+                    time: "7:00",
+                    food: "Morning Detox Protocol",
+                    proteins: 2,
+                    calories: 15,
+                    ingredients: ["Acqua tiepida + limone + sale", "Stabilium", "Spremuta melograno (opz)"]
+                },
+                {
                     id: "lun-colazione",
                     type: "🌅 Colazione",
-                    time: "7:30",
-                    food: "Uova strapazzate con pane ezekiel",
-                    proteins: 32,
-                    calories: 450,
-                    ingredients: ["4 uova", "2 fette pane ezekiel", "100g spinaci", "10g olio oliva"]
-                },
-                {
-                    id: "lun-preworkout",
-                    type: "⚡ Pre-Workout",
-                    time: "11:00",
-                    food: "Banana con BCAA",
-                    proteins: 8,
-                    calories: 150,
-                    ingredients: ["1 banana media", "5g BCAA", "caffè nero"]
-                },
-                {
-                    id: "lun-postworkout",
-                    type: "💥 Post-Workout",
-                    time: "13:30",
-                    food: "Whey shake con avena",
-                    proteins: 30,
-                    calories: 400,
-                    ingredients: ["1.5 scoop whey", "40g avena", "15g miele"]
+                    time: "8:00",
+                    food: "Omelette funzionale completa",
+                    proteins: 35,
+                    calories: 520,
+                    ingredients: ["3 uova + 3 albumi", "spinaci + aglio", "1 cucchiaio EVOO", "1/4 avocado", "porridge quinoa + latte mandorla", "mirtilli + semi chia", "GOS + inulina + cacao 6g + cannella"]
                 },
                 {
                     id: "lun-pranzo",
                     type: "🍽️ Pranzo",
-                    time: "15:00",
-                    food: "Manzo magro con quinoa",
+                    time: "12:30",
+                    food: "Salmone anti-infiammatorio",
                     proteins: 45,
-                    calories: 620,
-                    ingredients: ["200g manzo magro", "80g quinoa", "verdure miste", "olio oliva"]
+                    calories: 650,
+                    ingredients: ["200g salmone", "curcuma + pepe + zenzero", "3/4 tazza quinoa + patata dolce", "broccoli + semi zucca + EVOO", "insalata verde + crauti/kimchi", "150g ceci/lenticchie"]
                 },
                 {
-                    id: "lun-cena",
-                    type: "🌙 Cena",
-                    time: "20:30",
-                    food: "Merluzzo con riso integrale",
-                    proteins: 38,
-                    calories: 480,
-                    ingredients: ["180g merluzzo", "70g riso integrale", "200g asparagi"]
+                    id: "lun-snack",
+                    type: "💪 Snack/Post-WO",
+                    time: "15:30",
+                    food: "Power shake al cacao",
+                    proteins: 30,
+                    calories: 380,
+                    ingredients: ["shake proteico + banana", "spinaci + burro mandorle", "cacao 6g", "2 quadretti fondente 90%"]
                 }
             ]
         },
@@ -113,49 +104,40 @@ const NutritionBella = () => {
             color: "#4ecdc4",
             meals: [
                 {
-                    id: "mar-colazione",
-                    type: "🌅 Colazione",
-                    time: "7:30",
-                    food: "Yogurt greco con granola",
-                    proteins: 25,
-                    calories: 380,
-                    ingredients: ["200g yogurt greco 0%", "40g granola", "100g frutti bosco"]
+                    id: "mar-idratazione",
+                    type: "💧 Idratazione & Primer",
+                    time: "7:00",
+                    food: "Morning Detox Protocol",
+                    proteins: 2,
+                    calories: 15,
+                    ingredients: ["Acqua tiepida + limone + sale", "Stabilium", "Spremuta melograno (opz)"]
                 },
                 {
-                    id: "mar-spuntino",
-                    type: "🍎 Spuntino",
-                    time: "10:30",
-                    food: "Mela con mandorle e ricotta",
-                    proteins: 18,
-                    calories: 280,
-                    ingredients: ["1 mela", "20g mandorle", "100g ricotta"]
+                    id: "mar-colazione",
+                    type: "🌅 Colazione",
+                    time: "8:00",
+                    food: "Pancake funzionali GF",
+                    proteins: 28,
+                    calories: 465,
+                    ingredients: ["pancake avena GF + albume + 1 uovo + cannella", "burro d'arachidi", "fragole & lamponi", "tè verde", "1 cucchiaio EVOO a crudo"]
                 },
                 {
                     id: "mar-pranzo",
                     type: "🍽️ Pranzo",
-                    time: "13:00",
-                    food: "Tacchino con farro",
-                    proteins: 42,
-                    calories: 540,
-                    ingredients: ["180g tacchino", "80g farro", "200g zucchine", "olio EVO"]
+                    time: "12:30",
+                    food: "Pollo speziato con prebiotici",
+                    proteins: 48,
+                    calories: 620,
+                    ingredients: ["200g petto pollo", "rosmarino + cumino", "100g riso integrale", "aceto mele prima", "cavolo nero + aglio + EVOO", "1/4 avocado", "150g legumi + fermentati"]
                 },
                 {
                     id: "mar-snack",
-                    type: "🥤 Snack",
-                    time: "16:00",
-                    food: "Caseine con noci",
-                    proteins: 28,
-                    calories: 350,
-                    ingredients: ["1 scoop caseine", "15g noci", "2 datteri"]
-                },
-                {
-                    id: "mar-cena",
-                    type: "🌙 Cena",
-                    time: "20:00",
-                    food: "Tonno con pasta integrale",
-                    proteins: 35,
-                    calories: 500,
-                    ingredients: ["150g tonno fresco", "70g pasta integrale", "200g pomodorini"]
+                    type: "💪 Snack/Post-WO",
+                    time: "15:30",
+                    food: "Yogurt proteico con prebiotici",
+                    proteins: 25,
+                    calories: 280,
+                    ingredients: ["yogurt vegetale + proteine", "noci + inulina", "1 mela verde"]
                 }
             ]
         },
@@ -164,49 +146,40 @@ const NutritionBella = () => {
             color: "#45b7d1",
             meals: [
                 {
+                    id: "mer-idratazione",
+                    type: "💧 Idratazione & Primer",
+                    time: "7:00",
+                    food: "Morning Detox Protocol",
+                    proteins: 2,
+                    calories: 15,
+                    ingredients: ["Acqua tiepida + limone + sale", "Stabilium", "Spremuta melograno (opz)"]
+                },
+                {
                     id: "mer-colazione",
                     type: "🌅 Colazione",
-                    time: "7:45",
-                    food: "Porridge proteico con banana",
+                    time: "8:00",
+                    food: "Uova strapazzate anti-infiammatorie",
                     proteins: 30,
-                    calories: 420,
-                    ingredients: ["50g avena", "1 scoop whey", "1 banana", "cannella"]
-                },
-                {
-                    id: "mer-preworkout",
-                    type: "⚡ Pre-Workout",
-                    time: "11:30",
-                    food: "Toast integrale con marmellata",
-                    proteins: 8,
-                    calories: 180,
-                    ingredients: ["2 fette toast", "15g marmellata", "caffè"]
-                },
-                {
-                    id: "mer-postworkout",
-                    type: "💥 Post-Workout",
-                    time: "14:00",
-                    food: "Recovery shake completo",
-                    proteins: 25,
-                    calories: 320,
-                    ingredients: ["1 scoop whey", "30g malto", "5g creatina"]
+                    calories: 480,
+                    ingredients: ["3 uova + 2 albumi", "zucchine + curcuma/pepe", "EVOO", "1/2 tazza quinoa", "semi lino + mirtilli + GOS"]
                 },
                 {
                     id: "mer-pranzo",
                     type: "🍽️ Pranzo",
-                    time: "15:30",
-                    food: "Pollo curry con riso basmati",
-                    proteins: 40,
-                    calories: 580,
-                    ingredients: ["170g pollo", "80g riso", "curry", "verdure miste"]
+                    time: "12:30",
+                    food: "Tacchino speziato con prebiotici",
+                    proteins: 45,
+                    calories: 650,
+                    ingredients: ["200g tacchino", "curcuma + limone + zenzero", "200g patata dolce", "aceto mele prima", "spinaci + sesamo + EVOO", "150g legumi + fermentati"]
                 },
                 {
-                    id: "mer-cena",
-                    type: "🌙 Cena",
-                    time: "20:00",
-                    food: "Orata con quinoa",
-                    proteins: 36,
-                    calories: 460,
-                    ingredients: ["160g orata", "70g quinoa", "150g spinaci"]
+                    id: "mer-snack",
+                    type: "💪 Snack/Post-WO",
+                    time: "15:30",
+                    food: "Shake vegano al cacao",
+                    proteins: 28,
+                    calories: 360,
+                    ingredients: ["shake veg + latte mandorla", "fragole + burro anacardi", "cacao 6g", "2 quadretti 90%"]
                 }
             ]
         },
@@ -215,49 +188,40 @@ const NutritionBella = () => {
             color: "#96ceb4",
             meals: [
                 {
-                    id: "gio-colazione",
-                    type: "🌅 Colazione",
-                    time: "7:30",
-                    food: "Frittata con pane integrale",
-                    proteins: 28,
-                    calories: 400,
-                    ingredients: ["3 uova", "2 fette pane", "100g pomodori", "basilico"]
+                    id: "gio-idratazione",
+                    type: "💧 Idratazione & Primer",
+                    time: "7:00",
+                    food: "Morning Detox Protocol",
+                    proteins: 2,
+                    calories: 15,
+                    ingredients: ["Acqua tiepida + limone + sale", "Stabilium", "Spremuta melograno (opz)"]
                 },
                 {
-                    id: "gio-spuntino",
-                    type: "🥜 Spuntino",
-                    time: "10:00",
-                    food: "Parmigiano con noci e pera",
-                    proteins: 20,
-                    calories: 320,
-                    ingredients: ["30g parmigiano", "20g noci", "1 pera media"]
+                    id: "gio-colazione",
+                    type: "🌅 Colazione",
+                    time: "8:00",
+                    food: "Omelette con superfood",
+                    proteins: 32,
+                    calories: 510,
+                    ingredients: ["3 uova + 3 albumi", "zucchine/peperoni + aglio + prezzemolo", "EVOO", "1/2 avocado", "porridge amaranto + lamponi", "semi chia + inulina + cacao 6g + cannella"]
                 },
                 {
                     id: "gio-pranzo",
                     type: "🍽️ Pranzo",
-                    time: "13:00",
-                    food: "Bistecca con patate",
-                    proteins: 48,
-                    calories: 650,
-                    ingredients: ["200g bistecca", "200g patate", "50g rucola", "olio EVO"]
+                    time: "12:30",
+                    food: "Tonno con crucifere bowl",
+                    proteins: 50,
+                    calories: 620,
+                    ingredients: ["200g tonno", "bowl crucifere (broccoli+cauli ≥250g)", "150g lenticchie nere", "cumino + zenzero + EVOO", "2-4 cucchiai fermentati"]
                 },
                 {
                     id: "gio-snack",
-                    type: "🍓 Snack",
-                    time: "16:30",
-                    food: "Smoothie verde proteico",
-                    proteins: 26,
-                    calories: 280,
-                    ingredients: ["spinaci", "banana", "1 scoop whey", "acqua cocco"]
-                },
-                {
-                    id: "gio-cena",
-                    type: "🌙 Cena",
-                    time: "20:00",
-                    food: "Gamberi con pasta e zucchine",
-                    proteins: 32,
-                    calories: 480,
-                    ingredients: ["150g gamberi", "70g pasta", "200g zucchine"]
+                    type: "💪 Snack/Post-WO",
+                    time: "15:30",
+                    food: "Yogurt con superseeds",
+                    proteins: 24,
+                    calories: 290,
+                    ingredients: ["yogurt vegetale + proteine", "mirtilli + 1-2 noci brasiliane", "1 kiwi"]
                 }
             ]
         },
@@ -266,109 +230,82 @@ const NutritionBella = () => {
             color: "#feca57",
             meals: [
                 {
+                    id: "ven-idratazione",
+                    type: "💧 Idratazione & Primer",
+                    time: "7:00",
+                    food: "Morning Detox Protocol",
+                    proteins: 2,
+                    calories: 15,
+                    ingredients: ["Acqua tiepida + limone + sale", "Stabilium", "Spremuta melograno (opz)"]
+                },
+                {
                     id: "ven-colazione",
                     type: "🌅 Colazione",
-                    time: "7:30",
-                    food: "Muesli proteico completo",
-                    proteins: 32,
-                    calories: 450,
-                    ingredients: ["50g muesli", "250ml latte", "1 scoop whey", "frutti bosco"]
-                },
-                {
-                    id: "ven-preworkout",
-                    type: "⚡ Pre-Workout",
-                    time: "11:00",
-                    food: "Energy balls con caffè",
-                    proteins: 12,
-                    calories: 220,
-                    ingredients: ["3 energy balls fatti in casa", "caffè nero"]
-                },
-                {
-                    id: "ven-postworkout",
-                    type: "💥 Post-Workout",
-                    time: "13:30",
-                    food: "Recovery shake deluxe",
-                    proteins: 35,
-                    calories: 420,
-                    ingredients: ["1.5 scoop whey", "banana", "latte", "miele", "avena"]
+                    time: "8:00",
+                    food: "Uova strapazzate con prebiotici",
+                    proteins: 30,
+                    calories: 480,
+                    ingredients: ["3 uova + 2 albumi", "spinaci + curcuma/pepe", "EVOO", "1/2 tazza quinoa", "semi lino + mirtilli", "GOS/inulina", "tè verde"]
                 },
                 {
                     id: "ven-pranzo",
                     type: "🍽️ Pranzo",
-                    time: "15:00",
-                    food: "Salmone con quinoa e avocado",
-                    proteins: 38,
-                    calories: 580,
-                    ingredients: ["160g salmone", "80g quinoa", "1/2 avocado", "lime"]
+                    time: "12:30",
+                    food: "Manzo magro con fermentati (1x/sett)",
+                    proteins: 48,
+                    calories: 670,
+                    ingredients: ["200g manzo magro", "200g patata dolce", "aceto mele prima", "insalata cavolo + carote", "semi girasole + EVOO", "150g legumi + fermentati"]
                 },
                 {
-                    id: "ven-aperitivo",
-                    type: "🍻 Aperitivo",
-                    time: "18:30",
-                    food: "Hummus con verdure",
-                    proteins: 15,
-                    calories: 280,
-                    ingredients: ["60g hummus", "verdure crude", "crackers integrali"]
-                },
-                {
-                    id: "ven-cena",
-                    type: "🌙 Cena",
-                    time: "21:00",
-                    food: "Pizza proteica fatta in casa",
-                    proteins: 35,
-                    calories: 520,
-                    ingredients: ["base proteica", "pomodoro", "mozzarella", "prosciutto"]
+                    id: "ven-snack",
+                    type: "💪 Snack/Post-WO",
+                    time: "15:30",
+                    food: "Shake proteico al cacao",
+                    proteins: 30,
+                    calories: 380,
+                    ingredients: ["shake proteico + latte riso", "banana + burro arachidi", "cacao 6g"]
                 }
             ]
         },
         6: { // Sabato
-            name: "🎉 SABATO - CHEAT DAY",
+            name: "🎉 SABATO - OMEGA DAY",
             color: "#a55eea",
             meals: [
                 {
-                    id: "sab-colazione",
-                    type: "🌅 Colazione",
-                    time: "9:00",
-                    food: "Pancakes proteici deluxe",
-                    proteins: 35,
-                    calories: 550,
-                    ingredients: ["pancakes proteici", "sciroppo acero", "3 fette bacon"]
+                    id: "sab-idratazione",
+                    type: "💧 Idratazione & Primer",
+                    time: "7:00",
+                    food: "Morning Detox Protocol",
+                    proteins: 2,
+                    calories: 15,
+                    ingredients: ["Acqua tiepida + limone + sale", "Stabilium", "Spremuta melograno (opz)"]
                 },
                 {
-                    id: "sab-brunch",
-                    type: "🥐 Brunch",
-                    time: "11:30",
-                    food: "Avocado toast gourmet",
-                    proteins: 30,
-                    calories: 480,
-                    ingredients: ["pane integrale", "avocado", "2 uova", "salmone affumicato"]
+                    id: "sab-colazione",
+                    type: "🌅 Colazione",
+                    time: "8:00",
+                    food: "Pancake proteici con antiossidanti",
+                    proteins: 28,
+                    calories: 460,
+                    ingredients: ["pancake avena GF + albume + proteine", "≥150g frutti di bosco", "burro di mandorle", "tè verde + EVOO"]
                 },
                 {
                     id: "sab-pranzo",
                     type: "🍽️ Pranzo",
-                    time: "14:00",
-                    food: "Burger proteico premium",
+                    time: "12:30",
+                    food: "Pesce azzurro con omega-3",
                     proteins: 45,
-                    calories: 680,
-                    ingredients: ["180g carne", "panino integrale", "patate dolci", "insalata"]
+                    calories: 650,
+                    ingredients: ["200g sgombro/sardine", "3/4 tazza quinoa", "aceto mele prima", "broccoli + spinaci", "semi lino + EVOO", "insalata rucola+pomodorini + fermentati", "150g legumi"]
                 },
                 {
                     id: "sab-snack",
-                    type: "🍨 Snack",
-                    time: "17:00",
-                    food: "Gelato proteico fatto in casa",
-                    proteins: 20,
-                    calories: 250,
-                    ingredients: ["whey", "latte", "frutta", "dolcificante"]
-                },
-                {
-                    id: "sab-cena",
-                    type: "🌙 Cena",
-                    time: "20:30",
-                    food: "Grigliata mista premium",
-                    proteins: 50,
-                    calories: 720,
-                    ingredients: ["carne mista", "verdure grigliate", "pane integrale"]
+                    type: "💪 Snack/Post-WO",
+                    time: "15:30",
+                    food: "Yogurt con omega seeds",
+                    proteins: 26,
+                    calories: 320,
+                    ingredients: ["yogurt vegetale + proteine", "semi di chia + noci", "1 mela"]
                 }
             ]
         }
