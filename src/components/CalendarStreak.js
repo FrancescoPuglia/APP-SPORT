@@ -1,4 +1,5 @@
 import React from 'react';
+import { dataManager } from '../utils/dataManager';
 
 const CalendarStreak = () => {
     const [currentDate, setCurrentDate] = React.useState(new Date());
@@ -57,6 +58,11 @@ const CalendarStreak = () => {
     };
 
     const calculateCurrentStreak = (data) => {
+        // 🔥 BUG FIX: Calcola streak dai dati REALI di dataManager
+        const realWorkouts = dataManager.getWorkouts() || [];
+        const realStreak = dataManager.calculateWorkoutStreak(realWorkouts);
+        
+        // Usa anche il vecchio sistema per compatibilità
         const today = new Date();
         let streak = 0;
         let checkDate = new Date(today);
@@ -77,7 +83,8 @@ const CalendarStreak = () => {
             if (streak > 365) break;
         }
         
-        return streak;
+        console.log(`🔥 Streak CalendarStreak: ${streak}, DataManager: ${realStreak}`);
+        return Math.max(streak, realStreak);
     };
 
     const calculateLongestStreak = (data) => {
