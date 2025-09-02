@@ -54,7 +54,8 @@ const Dashboard = () => {
     const loadDashboardData = () => {
         const progressData = JSON.parse(localStorage.getItem('progressData') || '[]');
         const timeStats = JSON.parse(localStorage.getItem('timeStats') || '{}');
-        const workoutSessions = JSON.parse(localStorage.getItem('workoutSessions') || '[]');
+        // 🔥 BUG FIX: Legge dai dati REALI salvati da WorkoutSimple
+        const workoutSessions = dataManager.getWorkouts() || [];
         const goals = JSON.parse(localStorage.getItem('goals12Week') || '{}');
         
         const latestProgress = progressData[0];
@@ -146,15 +147,23 @@ const Dashboard = () => {
 
     const isDayCompleted = (day) => {
         if (!day) return false;
-        // Simula giorni completati basati su workout sessions
-        const completedWorkouts = JSON.parse(localStorage.getItem('workoutSessions') || '[]');
-        const date = new Date();
-        date.setDate(day);
+        // 🔥 BUG FIX: Usa i dati REALI da dataManager
+        const completedWorkouts = dataManager.getWorkouts() || [];
+        
+        // 🚨 BUG FIX CRITICO: Costruisce data del MESE CORRENTE, non quello di oggi
+        const today = new Date();
+        const currentMonth = today.getMonth();
+        const currentYear = today.getFullYear();
+        const date = new Date(currentYear, currentMonth, day);
         const dayString = date.toDateString();
         
-        return completedWorkouts.some(workout => 
+        const hasWorkout = completedWorkouts.some(workout => 
             new Date(workout.date).toDateString() === dayString
         );
+        
+        console.log(`🔍 Controllo giorno ${day}: ${dayString}, workout trovato: ${hasWorkout}`);
+        console.log(`🔍 Workouts disponibili:`, completedWorkouts.map(w => ({ date: w.date, dateString: new Date(w.date).toDateString() })));
+        return hasWorkout;
     };
     
     const getNutritionStreak = () => {
@@ -174,7 +183,9 @@ const Dashboard = () => {
         // 🔥 LISTENER PER AGGIORNAMENTI REAL-TIME
         const handleWorkoutCompleted = (event) => {
             console.log('🚀 Workout completato, ricarico dashboard!', event.detail);
+            console.log('📊 DataManager workouts prima reload:', dataManager.getWorkouts());
             loadDashboardData(); // Ricarica tutti i dati
+            console.log('📊 Dashboard data dopo reload:', dashboardData);
         };
         
         const handleMealToggled = (event) => {

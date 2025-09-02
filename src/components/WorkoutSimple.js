@@ -166,12 +166,18 @@ const WorkoutSimple = () => {
 
         const workoutData = {
             ...currentWorkout,
+            date: new Date().toISOString(), // 🔥 BUG FIX: Aggiunge data esplicita
             duration: Math.round((Date.now() - currentWorkout.startTime) / 1000 / 60), // minuti
             type: workoutPlan[currentWorkout.day]?.focus || 'Workout Generico'
         };
 
         // Salva nel dataManager
         dataManager.saveWorkout(workoutData);
+
+        // 🔥 SALVA ANCHE NEL VECCHIO SISTEMA PER RETROCOMPATIBILITÀ  
+        const oldWorkoutSessions = JSON.parse(localStorage.getItem('workoutSessions') || '[]');
+        oldWorkoutSessions.unshift(workoutData);
+        localStorage.setItem('workoutSessions', JSON.stringify(oldWorkoutSessions));
 
         // 🔥 AGGIORNA STREAK CALENDARIO (BUG FIX CRITICO!)
         calendarHook.markWorkoutCompleted(new Date(), workoutData.type, workoutData.exercises);
@@ -187,8 +193,12 @@ const WorkoutSimple = () => {
         setIsWorkoutActive(false);
         setSelectedDay(null);
 
+        console.log('🚀 WORKOUT SALVATO:', workoutData);
+        console.log('📊 DataManager workouts:', dataManager.getWorkouts());
+        console.log('📅 Old workoutSessions:', JSON.parse(localStorage.getItem('workoutSessions') || '[]'));
+        
         alert(`🎉 Workout salvato! ${workoutData.exercises.length} esercizi completati in ${workoutData.duration} minuti.
-        🔥 STREAK AGGIORNATO: ${calendarHook.calculateCurrentStreak() + 1} giorni!`);
+        🔥 STREAK AGGIORNATO: Ricarica la Dashboard per vedere i cambiamenti!`);
     };
 
     const isExerciseCompleted = (exerciseName) => {
