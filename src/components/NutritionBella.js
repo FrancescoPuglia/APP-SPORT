@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { dataManager } from '../utils/dataManager';
 
 const NutritionBella = () => {
     const navigate = useNavigate();
@@ -11,6 +12,12 @@ const NutritionBella = () => {
     const [currentStreak, setCurrentStreak] = useState(() => {
         const saved = localStorage.getItem('nutritionStreak');
         return saved ? parseInt(saved) : 0;
+    });
+    
+    // 🍕 SISTEMA TRACKING SGARRI
+    const [cheats, setCheats] = useState(() => {
+        const saved = localStorage.getItem('nutritionCheats');
+        return saved ? JSON.parse(saved) : {};
     });
 
     // TUA DIETA PERSONALIZZATA - 7 GIORNI
@@ -325,8 +332,27 @@ const NutritionBella = () => {
         setCompletedMeals(newCompleted);
         localStorage.setItem('completedMeals', JSON.stringify(newCompleted));
         
+        // 💾 SALVA ANCHE NEL DATAMANAGER PER ANALYTICS
+        const nutritionData = {
+            mealId: mealId,
+            completed: !completedMeals[key],
+            timestamp: new Date().toISOString(),
+            day: selectedDay,
+            mealData: weeklyDiet[selectedDay].meals.find(m => m.id === mealId)
+        };
+        
+        // Salva nel sistema centralizzato per analytics
+        const nutritionHistory = JSON.parse(localStorage.getItem('nutritionHistory') || '[]');
+        nutritionHistory.unshift(nutritionData);
+        localStorage.setItem('nutritionHistory', JSON.stringify(nutritionHistory));
+        
         // Calcola streak
         updateStreak(newCompleted);
+        
+        // 🔥 TRIGGER EVENTO PER AGGIORNAMENTO DASHBOARD
+        window.dispatchEvent(new CustomEvent('mealToggled', { 
+            detail: nutritionData 
+        }));
     };
 
     const updateStreak = (meals) => {
@@ -338,6 +364,17 @@ const NutritionBella = () => {
             const newStreak = currentStreak + 1;
             setCurrentStreak(newStreak);
             localStorage.setItem('nutritionStreak', newStreak.toString());
+            
+            // 🔥 TRIGGER AGGIORNAMENTO ANALYTICS REAL-TIME
+            setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('nutritionCompleted', { 
+                    detail: { 
+                        streak: newStreak, 
+                        mealsCompleted: completedToday,
+                        totalMeals: todayMeals.length 
+                    } 
+                }));
+            }, 100);
         }
     };
 
@@ -412,6 +449,62 @@ const NutritionBella = () => {
         ).length;
         
         return completedMealsForDay === dayMeals.length;
+    };
+
+    // 🍕 FUNZIONI SGARRI
+    const addCheat = (date = new Date()) => {
+        const dateString = date.toDateString();
+        const cheatData = {
+            date: dateString,
+            timestamp: new Date().toISOString(),
+            month: date.getMonth(),
+            year: date.getFullYear()
+        };
+        
+        const newCheats = {
+            ...cheats,
+            [dateString]: cheatData
+        };
+        
+        setCheats(newCheats);
+        localStorage.setItem('nutritionCheats', JSON.stringify(newCheats));
+        
+        // 🚨 TRIGGER EVENTO SGARRO
+        window.dispatchEvent(new CustomEvent('cheatAdded', { 
+            detail: cheatData 
+        }));
+        
+        alert('🍕 Sgarro registrato! Non è un fallimento, è parte del percorso!');
+    };
+    
+    const removeCheat = (date = new Date()) => {
+        const dateString = date.toDateString();
+        const newCheats = { ...cheats };
+        delete newCheats[dateString];
+        
+        setCheats(newCheats);
+        localStorage.setItem('nutritionCheats', JSON.stringify(newCheats));
+        
+        window.dispatchEvent(new CustomEvent('cheatRemoved', { 
+            detail: { date: dateString } 
+        }));
+    };
+    
+    const hasCheatOnDay = (day) => {
+        if (!day) return false;
+        const date = new Date();
+        date.setDate(day);
+        const dayString = date.toDateString();
+        return !!cheats[dayString];
+    };
+    
+    const getMonthlyCheatCount = () => {
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+        
+        return Object.values(cheats).filter(cheat => 
+            cheat.month === currentMonth && cheat.year === currentYear
+        ).length;
     };
 
     const calendar = generateCalendar();
@@ -528,11 +621,12 @@ const NutritionBella = () => {
                                 cursor: day ? 'pointer' : 'default',
                                 background: day ? (
                                     isToday(day) ? '#ff9500' :
+                                    hasCheatOnDay(day) ? '#ef4444' :
                                     isDayCompleted(day) ? '#22c55e' : 
                                     'rgba(255, 255, 255, 0.05)'
                                 ) : 'transparent',
                                 color: day ? (
-                                    isToday(day) || isDayCompleted(day) ? 'white' : '#ccc'
+                                    isToday(day) || isDayCompleted(day) || hasCheatOnDay(day) ? 'white' : '#ccc'
                                 ) : 'transparent',
                                 fontWeight: isToday(day) ? 'bold' : 'normal',
                                 border: isToday(day) ? '2px solid white' : '1px solid transparent',
@@ -540,7 +634,10 @@ const NutritionBella = () => {
                                 transition: 'all 0.3s ease'
                             }}>
                                 {day}
-                                {isDayCompleted(day) && !isToday(day) && (
+                                {hasCheatOnDay(day) && !isToday(day) && (
+                                    <div style={{ fontSize: '0.8rem', marginTop: '2px' }}>🍕</div>
+                                )}
+                                {isDayCompleted(day) && !isToday(day) && !hasCheatOnDay(day) && (
                                     <div style={{ fontSize: '0.8rem', marginTop: '2px' }}>✅</div>
                                 )}
                                 {isToday(day) && (
@@ -550,8 +647,20 @@ const NutritionBella = () => {
                         ))}
                     </div>
                     
-                    <div style={{ textAlign: 'center', color: '#aaa', fontSize: '0.9rem' }}>
-                        🟠 Oggi • 🟢 Giorno completato • ⚪ Da completare
+                    <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        background: 'rgba(255, 149, 0, 0.1)',
+                        padding: '15px 20px',
+                        borderRadius: '15px'
+                    }}>
+                        <div style={{ color: '#aaa', fontSize: '0.9rem' }}>
+                            🟠 Oggi • 🟢 Completato • 🍕 Sgarro • ⚪ Da completare
+                        </div>
+                        <div style={{ color: '#ef4444', fontWeight: 'bold' }}>
+                            🍕 {getMonthlyCheatCount()} sgarri questo mese
+                        </div>
                     </div>
                 </div>
 
@@ -632,6 +741,12 @@ const NutritionBella = () => {
                                 {getTotalCalories()}
                             </div>
                             <div style={{ color: '#aaa', fontSize: '0.9rem' }}>Kcal</div>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ef4444' }}>
+                                {getMonthlyCheatCount()}
+                            </div>
+                            <div style={{ color: '#aaa', fontSize: '0.9rem' }}>Sgarri Mese</div>
                         </div>
                     </div>
                     
@@ -825,12 +940,7 @@ const NutritionBella = () => {
                     </Link>
                     
                     <button 
-                        onClick={() => {
-                            setCompletedMeals({});
-                            setCurrentStreak(0);
-                            localStorage.removeItem('completedMeals');
-                            localStorage.removeItem('nutritionStreak');
-                        }}
+                        onClick={() => addCheat()}
                         style={{
                             background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
                             color: 'white',
@@ -844,7 +954,33 @@ const NutritionBella = () => {
                             boxShadow: '0 5px 15px rgba(239, 68, 68, 0.3)'
                         }}
                     >
-                        🔄 Reset Progresso
+                        🍕 Registra Sgarro Oggi
+                    </button>
+                    
+                    <button 
+                        onClick={() => {
+                            setCompletedMeals({});
+                            setCurrentStreak(0);
+                            setCheats({});
+                            localStorage.removeItem('completedMeals');
+                            localStorage.removeItem('nutritionStreak');
+                            localStorage.removeItem('nutritionCheats');
+                            localStorage.removeItem('nutritionHistory');
+                        }}
+                        style={{
+                            background: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
+                            color: 'white',
+                            border: 'none',
+                            padding: '15px 25px',
+                            borderRadius: '25px',
+                            fontWeight: 'bold',
+                            fontSize: '1rem',
+                            cursor: 'pointer',
+                            transition: 'transform 0.3s ease',
+                            boxShadow: '0 5px 15px rgba(107, 114, 128, 0.3)'
+                        }}
+                    >
+                        🔄 Reset Tutto
                     </button>
                 </div>
             </div>

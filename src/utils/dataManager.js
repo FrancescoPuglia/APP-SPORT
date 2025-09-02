@@ -52,6 +52,8 @@ class DataManager {
     getNutritionData() {
         const completedMeals = JSON.parse(localStorage.getItem('completedMeals') || '{}');
         const nutritionStreak = parseInt(localStorage.getItem('nutritionStreak') || '0');
+        const nutritionHistory = JSON.parse(localStorage.getItem('nutritionHistory') || '[]');
+        const nutritionCheats = JSON.parse(localStorage.getItem('nutritionCheats') || '{}');
         
         // Calcola aderenza alla dieta basata sui pasti completati
         const today = new Date().toDateString();
@@ -62,7 +64,7 @@ class DataManager {
             date.setDate(date.getDate() - i);
             const dayString = date.toDateString();
             
-            // Conta pasti completati per ogni giorno
+            // Conta pasti completati per ogni giorno (assumendo 4 pasti/giorno)
             const dayMeals = Object.keys(completedMeals).filter(key => 
                 key.startsWith(dayString)
             ).length;
@@ -70,16 +72,58 @@ class DataManager {
             last7Days.push({
                 date: dayString,
                 mealsCompleted: dayMeals,
-                adherence: Math.min((dayMeals / 4) * 100, 100) // Assumiamo 4 pasti al giorno
+                adherence: Math.min((dayMeals / 4) * 100, 100)
             });
         }
+
+        // 🍕 CALCOLI SGARRI
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+        const monthlyCheats = Object.values(nutritionCheats).filter(cheat => 
+            cheat.month === currentMonth && cheat.year === currentYear
+        ).length;
+
+        const totalCheats = Object.keys(nutritionCheats).length;
+        const last30DaysCheats = Object.values(nutritionCheats).filter(cheat => {
+            const cheatDate = new Date(cheat.timestamp);
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            return cheatDate >= thirtyDaysAgo;
+        }).length;
+
+        // 📊 CALCOLI AVANZATI PER ANALYTICS
+        const totalMealsCompleted = nutritionHistory.filter(n => n.completed).length;
+        const avgProteinsDaily = this.calculateAvgProteins(completedMeals);
+        const avgCaloriesDaily = this.calculateAvgCalories(completedMeals);
 
         return {
             completedMeals,
             nutritionStreak,
+            nutritionHistory,
+            nutritionCheats,
             weeklyAdherence: last7Days,
-            avgAdherence: last7Days.reduce((sum, day) => sum + day.adherence, 0) / 7
+            avgAdherence: last7Days.reduce((sum, day) => sum + day.adherence, 0) / 7,
+            totalMealsCompleted,
+            avgProteinsDaily,
+            avgCaloriesDaily,
+            lastMealTime: nutritionHistory[0]?.timestamp || null,
+            monthlyCheats,
+            totalCheats,
+            last30DaysCheats,
+            cheatFrequency: totalCheats > 0 ? (totalCheats / Math.max(1, nutritionHistory.length / 30)) : 0
         };
+    }
+
+    calculateAvgProteins(completedMeals) {
+        // Stima proteine basata sui pasti completati (media 35g per pasto)
+        const completedCount = Object.values(completedMeals).filter(Boolean).length;
+        return Math.round((completedCount * 35) / 7); // Media settimanale
+    }
+
+    calculateAvgCalories(completedMeals) {
+        // Stima calorie basata sui pasti completati (media 450 kcal per pasto)
+        const completedCount = Object.values(completedMeals).filter(Boolean).length;
+        return Math.round((completedCount * 450) / 7); // Media settimanale
     }
 
     // ===== ANALYTICS DATA COMPILATION =====
@@ -122,7 +166,8 @@ class DataManager {
             .map(w => new Date(w.date))
             .sort((a, b) => b - a);
 
-        for (let i = 0; i < 30; i++) { // Controlla ultimi 30 giorni
+        // 🔥 ALGORITMO MIGLIORATO PER STREAK ACCURATO
+        for (let i = 0; i < 365; i++) { // Controlla ultimo anno
             const dayString = currentDate.toDateString();
             const hasWorkout = sortedWorkouts.some(date => 
                 date.toDateString() === dayString
@@ -130,13 +175,18 @@ class DataManager {
             
             if (hasWorkout) {
                 streak++;
-            } else if (streak > 0) {
-                break; // Fine streak
+            } else if (i === 0) {
+                // Se oggi non c'è workout, controlla ieri
+                currentDate.setDate(currentDate.getDate() - 1);
+                continue;
+            } else {
+                break; // Fine streak quando trova giorno senza workout
             }
             
             currentDate.setDate(currentDate.getDate() - 1);
         }
         
+        console.log(`🔥 Streak calcolato: ${streak} giorni`);
         return streak;
     }
 

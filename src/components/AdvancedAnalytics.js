@@ -43,13 +43,54 @@ const AdvancedAnalytics = () => {
         const loadRealData = () => {
             const data = dataManager.getAnalyticsData();
             setRealData(data);
+            console.log('📊 Analytics aggiornati:', data);
         };
         
         loadRealData();
         
+        // 🔥 LISTENER PER AGGIORNAMENTI ISTANTANEI
+        const handleWorkoutCompleted = (event) => {
+            console.log('🚀 Nuovo workout, aggiorno analytics!', event.detail);
+            loadRealData(); // Ricarica SUBITO i dati
+        };
+        
+        const handleMealToggled = (event) => {
+            console.log('🍽️ Pasto aggiornato, aggiorno analytics!', event.detail);
+            loadRealData(); // Ricarica SUBITO i dati
+        };
+        
+        const handleNutritionCompleted = (event) => {
+            console.log('🔥 Giorno nutrizionale completato, aggiorno analytics!', event.detail);
+            loadRealData(); // Ricarica SUBITO i dati
+        };
+        
+        const handleCheatAdded = (event) => {
+            console.log('🍕 Sgarro registrato, aggiorno analytics!', event.detail);
+            loadRealData(); // Ricarica SUBITO i dati
+        };
+        
+        const handleCheatRemoved = (event) => {
+            console.log('🚫 Sgarro rimosso, aggiorno analytics!', event.detail);
+            loadRealData(); // Ricarica SUBITO i dati
+        };
+        
+        window.addEventListener('workoutCompleted', handleWorkoutCompleted);
+        window.addEventListener('mealToggled', handleMealToggled);
+        window.addEventListener('nutritionCompleted', handleNutritionCompleted);
+        window.addEventListener('cheatAdded', handleCheatAdded);
+        window.addEventListener('cheatRemoved', handleCheatRemoved);
+        
         // Ricarica ogni 30 secondi per dati aggiornati
         const interval = setInterval(loadRealData, 30000);
-        return () => clearInterval(interval);
+        
+        return () => {
+            window.removeEventListener('workoutCompleted', handleWorkoutCompleted);
+            window.removeEventListener('mealToggled', handleMealToggled);
+            window.removeEventListener('nutritionCompleted', handleNutritionCompleted);
+            window.removeEventListener('cheatAdded', handleCheatAdded);
+            window.removeEventListener('cheatRemoved', handleCheatRemoved);
+            clearInterval(interval);
+        };
     }, []);
 
     // DATI MOCK COME FALLBACK (QUANDO NON CI SONO DATI REALI)
@@ -619,6 +660,13 @@ const AdvancedAnalytics = () => {
                             <div className="stat-info">
                                 <span className="stat-value">{stats.nutritionAdherence}%</span>
                                 <span className="stat-label">Aderenza Dieta</span>
+                            </div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-icon">🍕</div>
+                            <div className="stat-info">
+                                <span className="stat-value">{realData?.nutrition?.monthlyCheats || 0}</span>
+                                <span className="stat-label">Sgarri Mese</span>
                             </div>
                         </div>
                     </div>

@@ -1,9 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dataManager } from '../utils/dataManager';
+import CalendarStreak from './CalendarStreak';
 
 const WorkoutSimple = () => {
     const navigate = useNavigate();
+    const calendarHook = CalendarStreak(); // HOOK PER AGGIORNARE STREAK
     const [selectedDay, setSelectedDay] = React.useState(null);
     const [selectedExercise, setSelectedExercise] = React.useState(null);
     const [isWorkoutActive, setIsWorkoutActive] = React.useState(false);
@@ -171,12 +173,22 @@ const WorkoutSimple = () => {
         // Salva nel dataManager
         dataManager.saveWorkout(workoutData);
 
+        // 🔥 AGGIORNA STREAK CALENDARIO (BUG FIX CRITICO!)
+        calendarHook.markWorkoutCompleted(new Date(), workoutData.type, workoutData.exercises);
+        
+        // 📊 FORZA AGGIORNAMENTO ANALYTICS
+        setTimeout(() => {
+            // Trigger reload dei dati analytics
+            window.dispatchEvent(new CustomEvent('workoutCompleted', { detail: workoutData }));
+        }, 100);
+
         // Reset stato
         setCurrentWorkout({ exercises: [], startTime: null, duration: 0, day: null });
         setIsWorkoutActive(false);
         setSelectedDay(null);
 
-        alert(`🎉 Workout salvato! ${workoutData.exercises.length} esercizi completati in ${workoutData.duration} minuti.`);
+        alert(`🎉 Workout salvato! ${workoutData.exercises.length} esercizi completati in ${workoutData.duration} minuti.
+        🔥 STREAK AGGIORNATO: ${calendarHook.calculateCurrentStreak() + 1} giorni!`);
     };
 
     const isExerciseCompleted = (exerciseName) => {

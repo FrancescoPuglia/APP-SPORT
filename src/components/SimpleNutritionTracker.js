@@ -1,10 +1,13 @@
 // Simplified Nutrition Tracker - Debug version
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 // import { useAuth } from './AuthProvider';
 
 const SimpleNutritionTracker = () => {
     // const { user } = useAuth();
-    const [selectedMeals, setSelectedMeals] = useState({});
+    const [selectedMeals, setSelectedMeals] = useState(() => {
+        const saved = localStorage.getItem('simpleNutritionMeals');
+        return saved ? JSON.parse(saved) : {};
+    });
 
     const MEALS = [
         { id: 'colazione', name: '🌅 Colazione', time: '8:00' },
@@ -16,9 +19,22 @@ const SimpleNutritionTracker = () => {
 
     const toggleMeal = (day, mealId) => {
         const key = `${day}-${mealId}`;
-        setSelectedMeals(prev => ({
-            ...prev,
-            [key]: !prev[key]
+        const newMeals = {
+            ...selectedMeals,
+            [key]: !selectedMeals[key]
+        };
+        
+        setSelectedMeals(newMeals);
+        localStorage.setItem('simpleNutritionMeals', JSON.stringify(newMeals));
+        
+        // 🔥 TRIGGER EVENTO PER SINCRONIZZAZIONE
+        window.dispatchEvent(new CustomEvent('mealToggled', { 
+            detail: { 
+                day, 
+                mealId, 
+                completed: !selectedMeals[key],
+                simple: true 
+            } 
         }));
     };
 
