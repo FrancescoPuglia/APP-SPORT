@@ -52,12 +52,23 @@ const Dashboard = () => {
     };
     
     const loadDashboardData = () => {
+        console.log('🚨 DASHBOARD LOADING - DEBUG COMPLETO');
+        
         // 🔥 SOLUZIONE DEFINITIVA: Usa SOLO dataManager come Analytics
         const analyticsData = dataManager.getAnalyticsData();
         const workouts = analyticsData.workouts || [];
         const measurements = analyticsData.measurements || [];
         const stats = analyticsData.stats || {};
         const goals = JSON.parse(localStorage.getItem('goals12Week') || '{}');
+        
+        console.log('📊 Analytics Data:', analyticsData);
+        console.log('🏋️ Workouts trovati:', workouts.length);
+        console.log('📅 Date workouts:', workouts.map(w => w.date));
+        console.log('🔥 Current Streak da stats:', stats.currentStreak);
+        
+        // 🚨 TEST DIRETTO ALGORITMO STREAK
+        const directStreak = dataManager.calculateWorkoutStreak(workouts);
+        console.log('🔥 Streak calcolato direttamente:', directStreak);
         
         const latestMeasurement = measurements[0];
         const firstMeasurement = measurements[measurements.length - 1];

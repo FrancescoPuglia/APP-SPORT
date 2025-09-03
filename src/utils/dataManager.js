@@ -155,38 +155,60 @@ class DataManager {
     }
 
     calculateWorkoutStreak(workouts) {
-        if (!workouts.length) return 0;
+        console.log(`🚨 CALCOLO STREAK - Input workouts:`, workouts.length);
         
-        const today = new Date();
-        let streak = 0;
-        let currentDate = new Date(today);
-        
-        // Ordina workouts per data
-        const sortedWorkouts = workouts
-            .map(w => new Date(w.date))
-            .sort((a, b) => b - a);
-
-        // 🔥 ALGORITMO MIGLIORATO PER STREAK ACCURATO
-        for (let i = 0; i < 365; i++) { // Controlla ultimo anno
-            const dayString = currentDate.toDateString();
-            const hasWorkout = sortedWorkouts.some(date => 
-                date.toDateString() === dayString
-            );
-            
-            if (hasWorkout) {
-                streak++;
-            } else if (i === 0) {
-                // Se oggi non c'è workout, controlla ieri
-                currentDate.setDate(currentDate.getDate() - 1);
-                continue;
-            } else {
-                break; // Fine streak quando trova giorno senza workout
-            }
-            
-            currentDate.setDate(currentDate.getDate() - 1);
+        if (!workouts.length) {
+            console.log(`❌ NESSUN WORKOUT TROVATO`);
+            return 0;
         }
         
-        console.log(`🔥 Streak calcolato: ${streak} giorni`);
+        // 🔥 FIX CRITICO: Usa solo la data (yyyy-mm-dd) ignorando orario
+        const workoutDates = workouts.map(w => {
+            const date = new Date(w.date);
+            return date.toISOString().split('T')[0]; // yyyy-mm-dd
+        });
+        
+        console.log(`📅 Date workout trovate:`, workoutDates);
+        
+        // Rimuovi duplicati e ordina
+        const uniqueDates = [...new Set(workoutDates)].sort().reverse();
+        console.log(`📅 Date uniche ordinate:`, uniqueDates);
+        
+        if (uniqueDates.length === 0) return 0;
+        
+        const today = new Date();
+        const todayString = today.toISOString().split('T')[0];
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayString = yesterday.toISOString().split('T')[0];
+        
+        console.log(`📅 Oggi: ${todayString}, Ieri: ${yesterdayString}`);
+        
+        let streak = 0;
+        let checkDate = new Date(today);
+        
+        // 🚨 ALGORITMO SEMPLIFICATO E CORRETTO
+        for (let i = 0; i < 365; i++) {
+            const checkString = checkDate.toISOString().split('T')[0];
+            
+            if (uniqueDates.includes(checkString)) {
+                streak++;
+                console.log(`✅ Workout trovato per ${checkString}, streak: ${streak}`);
+            } else {
+                // Se è il primo giorno (oggi) e non ha workout, controlla ieri
+                if (i === 0) {
+                    console.log(`⚠️ Oggi ${checkString} nessun workout, controllo ieri...`);
+                } else {
+                    console.log(`❌ Nessun workout per ${checkString}, streak interrotto a: ${streak}`);
+                    break;
+                }
+            }
+            
+            // Vai al giorno precedente
+            checkDate.setDate(checkDate.getDate() - 1);
+        }
+        
+        console.log(`🔥 STREAK FINALE: ${streak} giorni`);
         return streak;
     }
 
