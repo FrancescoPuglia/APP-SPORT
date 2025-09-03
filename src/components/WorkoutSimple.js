@@ -171,13 +171,52 @@ const WorkoutSimple = () => {
             type: workoutPlan[currentWorkout.day]?.focus || 'Workout Generico'
         };
 
-        // Salva nel dataManager
-        dataManager.saveWorkout(workoutData);
+        // 🚨 SALVATAGGIO MULTIPLO FORZATO - NIENTE PIÙ PROBLEMI!
+        console.log('🚨 INIZIO SALVATAGGIO FORZATO:', workoutData);
+        
+        // 1. DataManager (sistema nuovo)
+        try {
+            dataManager.saveWorkout(workoutData);
+            console.log('✅ Salvato in dataManager');
+        } catch (e) {
+            console.error('❌ Errore dataManager:', e);
+        }
 
-        // 🔥 SALVA ANCHE NEL VECCHIO SISTEMA PER RETROCOMPATIBILITÀ  
-        const oldWorkoutSessions = JSON.parse(localStorage.getItem('workoutSessions') || '[]');
-        oldWorkoutSessions.unshift(workoutData);
-        localStorage.setItem('workoutSessions', JSON.stringify(oldWorkoutSessions));
+        // 2. Sistema vecchio workoutSessions
+        try {
+            const oldWorkoutSessions = JSON.parse(localStorage.getItem('workoutSessions') || '[]');
+            oldWorkoutSessions.unshift(workoutData);
+            localStorage.setItem('workoutSessions', JSON.stringify(oldWorkoutSessions));
+            console.log('✅ Salvato in workoutSessions');
+        } catch (e) {
+            console.error('❌ Errore workoutSessions:', e);
+        }
+        
+        // 3. userData_workouts (diretto)
+        try {
+            const directWorkouts = JSON.parse(localStorage.getItem('userData_workouts') || '[]');
+            directWorkouts.unshift(workoutData);
+            localStorage.setItem('userData_workouts', JSON.stringify(directWorkouts));
+            console.log('✅ Salvato in userData_workouts');
+        } catch (e) {
+            console.error('❌ Errore userData_workouts:', e);
+        }
+        
+        // 4. Salvataggio streak diretto
+        try {
+            const today = new Date().toISOString().split('T')[0];
+            const streakData = JSON.parse(localStorage.getItem('streakData') || '{}');
+            streakData[today] = {
+                completed: true,
+                workoutType: workoutData.type,
+                exercises: workoutData.exercises,
+                timestamp: new Date().toISOString()
+            };
+            localStorage.setItem('streakData', JSON.stringify(streakData));
+            console.log('✅ Salvato streak direttamente');
+        } catch (e) {
+            console.error('❌ Errore streak:', e);
+        }
 
         // 🔥 AGGIORNA STREAK CALENDARIO (BUG FIX CRITICO!)
         calendarHook.markWorkoutCompleted(new Date(), workoutData.type, workoutData.exercises);
