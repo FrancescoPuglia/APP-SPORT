@@ -182,11 +182,33 @@ const WorkoutSimple = () => {
         // 🔥 AGGIORNA STREAK CALENDARIO (BUG FIX CRITICO!)
         calendarHook.markWorkoutCompleted(new Date(), workoutData.type, workoutData.exercises);
         
-        // 📊 FORZA AGGIORNAMENTO ANALYTICS
-        setTimeout(() => {
-            // Trigger reload dei dati analytics
-            window.dispatchEvent(new CustomEvent('workoutCompleted', { detail: workoutData }));
-        }, 100);
+        // 📊 AGGIORNA timeStats PER PERFORMANCE OVERVIEW
+        try {
+            const timeStats = JSON.parse(localStorage.getItem('timeStats') || '{}');
+            const timeLog = JSON.parse(localStorage.getItem('timeLog') || '[]');
+
+            // Aggiungi la durata della sessione corrente
+            const duration = workoutData.duration || 0; // in minuti
+            timeStats.totalWorkoutTime = (timeStats.totalWorkoutTime || 0) + duration;
+
+            // Log per calcolare la settimana
+            timeLog.unshift({ date: new Date().toISOString(), minutes: duration });
+            localStorage.setItem('timeLog', JSON.stringify(timeLog));
+
+            // Calcola i minuti ultimi 7 giorni
+            const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+            timeStats.weeklyTime = timeLog
+                .filter(e => new Date(e.date).getTime() >= oneWeekAgo)
+                .reduce((sum, e) => sum + (e.minutes || 0), 0);
+
+            localStorage.setItem('timeStats', JSON.stringify(timeStats));
+            console.log('📈 TimeStats aggiornato:', timeStats);
+        } catch (e) {
+            console.warn('TimeStats update failed:', e);
+        }
+        
+        // 📊 DISPATCH IMMEDIATO (SENZA TIMEOUT)
+        window.dispatchEvent(new CustomEvent('workoutCompleted', { detail: workoutData }));
 
         // Reset stato
         setCurrentWorkout({ exercises: [], startTime: null, duration: 0, day: null });

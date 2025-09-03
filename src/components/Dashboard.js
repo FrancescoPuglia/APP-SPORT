@@ -180,39 +180,48 @@ const Dashboard = () => {
     React.useEffect(() => {
         loadDashboardData();
         
-        // 🔥 LISTENER PER AGGIORNAMENTI REAL-TIME
+        // 🔥 LISTENER COMPLETI PER AGGIORNAMENTI REAL-TIME
+        const reload = () => loadDashboardData();
+        
         const handleWorkoutCompleted = (event) => {
             console.log('🚀 Workout completato, ricarico dashboard!', event.detail);
-            console.log('📊 DataManager workouts prima reload:', dataManager.getWorkouts());
-            loadDashboardData(); // Ricarica tutti i dati
-            console.log('📊 Dashboard data dopo reload:', dashboardData);
+            reload();
         };
         
         const handleMealToggled = (event) => {
             console.log('🍽️ Pasto aggiornato, ricarico dashboard!', event.detail);
-            loadDashboardData(); // Ricarica tutti i dati
+            reload();
         };
         
         const handleNutritionCompleted = (event) => {
             console.log('🔥 Giorno nutrizionale completato!', event.detail);
-            loadDashboardData(); // Ricarica tutti i dati
+            reload();
         };
         
         const handleCheatAdded = (event) => {
             console.log('🍕 Sgarro registrato!', event.detail);
-            loadDashboardData(); // Ricarica tutti i dati
+            reload();
         };
         
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') reload();
+        };
+        
+        // LISTENER COMPLETI
         window.addEventListener('workoutCompleted', handleWorkoutCompleted);
         window.addEventListener('mealToggled', handleMealToggled);
         window.addEventListener('nutritionCompleted', handleNutritionCompleted);
         window.addEventListener('cheatAdded', handleCheatAdded);
+        window.addEventListener('storage', reload); // 🔥 NUOVO: aggiornamento quando cambia localStorage
+        document.addEventListener('visibilitychange', handleVisibilityChange); // 🔥 NUOVO: quando torni alla tab
         
         return () => {
             window.removeEventListener('workoutCompleted', handleWorkoutCompleted);
             window.removeEventListener('mealToggled', handleMealToggled);
             window.removeEventListener('nutritionCompleted', handleNutritionCompleted);
             window.removeEventListener('cheatAdded', handleCheatAdded);
+            window.removeEventListener('storage', reload);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
     }, []);
 
@@ -286,8 +295,7 @@ const Dashboard = () => {
                     }}>
                         <div style={{ fontSize: '2rem', marginBottom: '8px' }}>🔥</div>
                         <div style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '5px', color: 'white' }}>
-                            {Math.max(dashboardData.currentStreak, getNutritionStreak(), 
-                                     dataManager.getAnalyticsData().stats.currentStreak || 0)}
+                            {dashboardData.currentStreak}
                         </div>
                         <div style={{ fontSize: '0.9rem', color: 'white', opacity: 0.9 }}>STREAK</div>
                     </div>
