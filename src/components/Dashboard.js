@@ -52,32 +52,57 @@ const Dashboard = () => {
     };
     
     const loadDashboardData = () => {
-        const progressData = JSON.parse(localStorage.getItem('progressData') || '[]');
-        const timeStats = JSON.parse(localStorage.getItem('timeStats') || '{}');
-        // 🔥 BUG FIX: Legge dai dati REALI salvati da WorkoutSimple
-        const workoutSessions = dataManager.getWorkouts() || [];
+        // 🔥 SOLUZIONE DEFINITIVA: Usa SOLO dataManager come Analytics
+        const analyticsData = dataManager.getAnalyticsData();
+        const workouts = analyticsData.workouts || [];
+        const measurements = analyticsData.measurements || [];
+        const stats = analyticsData.stats || {};
         const goals = JSON.parse(localStorage.getItem('goals12Week') || '{}');
         
-        const latestProgress = progressData[0];
-        const firstProgress = progressData[progressData.length - 1];
+        const latestMeasurement = measurements[0];
+        const firstMeasurement = measurements[measurements.length - 1];
         
+        // Calcola dati settimanali dai workout reali
         const today = new Date();
         const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-        const recentSessions = workoutSessions.filter(session => 
-            new Date(session.date) >= oneWeekAgo
-        );
+        const weeklyWorkouts = workouts.filter(w => new Date(w.date) >= oneWeekAgo);
+        
+        // Calcola tempo totale dai workout reali
+        const totalWorkoutTime = workouts.reduce((sum, w) => sum + (w.duration || 0), 0);
+        const weeklyTime = weeklyWorkouts.reduce((sum, w) => sum + (w.duration || 0), 0);
+        
+        // Calcola volume settimanale dai workout reali  
+        const weeklyVolume = weeklyWorkouts.reduce((sum, w) => {
+            if (!w.exercises) return sum;
+            return sum + w.exercises.reduce((exSum, ex) => 
+                exSum + (ex.weight || 0) * (ex.sets || 0) * (ex.reps || 0), 0
+            );
+        }, 0);
+        
+        // Calcola serie settimanali dai workout reali
+        const weeklySets = weeklyWorkouts.reduce((sum, w) => {
+            if (!w.exercises) return sum;
+            return sum + w.exercises.reduce((exSum, ex) => exSum + (ex.sets || 0), 0);
+        }, 0);
+        
+        // Calcola workout mensili
+        const oneMonthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+        const monthlyWorkouts = workouts.filter(w => new Date(w.date) >= oneMonthAgo);
         
         setDashboardData({
-            currentWeight: latestProgress?.weight || goals.startWeight || 75,
-            muscleGain: latestProgress && firstProgress ? 
-                (parseFloat(latestProgress.muscleMass) - parseFloat(firstProgress.muscleMass)) : 0,
-            workoutSessions: workoutSessions.length,
-            totalWorkoutTime: timeStats.totalWorkoutTime || 0,
-            weeklyTime: timeStats.weeklyTime || 0,
-            daysActive: new Set(workoutSessions.map(s => s.date.split('T')[0])).size,
-            lastWorkout: workoutSessions[0]?.date || null,
-            currentStreak: Math.max(calendarHook.calculateCurrentStreak(), 
-                                    dataManager.calculateWorkoutStreak(workoutSessions))
+            currentWeight: latestMeasurement?.weight || goals.startWeight || 75,
+            muscleGain: latestMeasurement && firstMeasurement ? 
+                (parseFloat(latestMeasurement.muscleMass) - parseFloat(firstMeasurement.muscleMass)) : 0,
+            workoutSessions: workouts.length,
+            totalWorkoutTime: totalWorkoutTime,
+            weeklyTime: weeklyTime,
+            daysActive: new Set(workouts.map(w => w.date.split('T')[0])).size,
+            lastWorkout: workouts[0]?.date || null,
+            currentStreak: stats.currentStreak || 0, // 🔥 USA SOLO dataManager streak
+            weeklyVolume: Math.round(weeklyVolume),
+            weeklySets: weeklySets,
+            weeklyWorkouts: weeklyWorkouts.length,
+            monthlyWorkouts: monthlyWorkouts.length
         });
         
         setTodayWorkout(getTodayWorkout());
@@ -174,7 +199,6 @@ const Dashboard = () => {
     const todayQuote = quotesHook.getTodayQuote();
     const todayProgress = exerciseHook.getTodayProgress(todayWorkout?.exercises);
     const supplementProgress = supplementsHook.getSupplementProgress();
-    const weeklyStats = exerciseHook.getWeeklyStats();
     const recoveryStats = recoveryHook.getRecoveryStats();
     
     React.useEffect(() => {
@@ -362,7 +386,7 @@ const Dashboard = () => {
                         🟠 Oggi • 🟢 Giorno completato • ⚪ Da completare
                     </div>
                     <div style={{ color: '#ff9500', fontWeight: 'bold' }}>
-                        📊 {calendarHook.monthlyStats?.monthlyWorkouts || 0} workout questo mese
+                        📊 {dashboardData.monthlyWorkouts || 0} workout questo mese
                     </div>
                 </div>
             </div>
@@ -373,12 +397,12 @@ const Dashboard = () => {
                 <div className="perf-grid">
                     <div className="perf-card strength">
                         <h4>💪 Forza</h4>
-                        <p className="perf-value">{weeklyStats.totalVolume || 0}kg</p>
+                        <p className="perf-value">{dashboardData.weeklyVolume || 0}kg</p>
                         <p className="perf-label">Volume Settimanale</p>
                     </div>
                     <div className="perf-card volume">
                         <h4>🏋️ Volume</h4>
-                        <p className="perf-value">{weeklyStats.totalSets || 0}</p>
+                        <p className="perf-value">{dashboardData.weeklySets || 0}</p>
                         <p className="perf-label">Serie Settimanali</p>
                     </div>
                     <div className="perf-card consistency">
@@ -473,7 +497,7 @@ const Dashboard = () => {
                 </p>
                 <div className="power-stats">
                     <span>💀 Disciplina: {Math.min(100, dashboardData.currentStreak * 3)}%</span>
-                    <span>⚡ Intensità: {Math.min(100, (weeklyStats.sessions || 0) * 20)}%</span>
+                    <span>⚡ Intensità: {Math.min(100, dashboardData.weeklyWorkouts * 20)}%</span>
                     <span>🔥 Dedizione: {Math.min(100, (goals12Week.weeksCompleted || 0) * 8)}%</span>
                 </div>
             </div>
