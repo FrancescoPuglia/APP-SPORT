@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(rm:*)",
+      "Bash(export NODE_OPTIONS=--openssl-legacy-provider)",
+      "Bash(git commit:*)",
+      "Bash(cp:*)",
+      "Bash(git push:*)",
+      "Bash(ls:*)",
+      "Bash(timeout 10s npm start)",
+      "Bash(node:*)",
+      "Bash(pkill:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run:*)",
+      "Bash(npm start)",
+      "Bash(curl:*)",
+      "Bash(npx create-react-app:*)",
+      "Bash(cat:*)",
+      "Bash(NODE_OPTIONS=\"--openssl-legacy-provider --max-old-space-size=4096\" npm start)",
+      "Bash(NODE_OPTIONS=\"--openssl-legacy-provider --max-old-space-size=4096\" npm run build 2 >& 1)",
+      "Bash(NODE_OPTIONS=\"--openssl-legacy-provider\" npm start)",
+      "Bash(NODE_OPTIONS=\"--openssl-legacy-provider\" npm run build)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(find:*)",
+      "Bash(npx eslint:*)",
+      "Bash(awk:*)",
+      "Bash(timeout 30 npm start)"
+    ],
+    "deny": []
+  }
+}
