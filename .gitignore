@@ -7,7 +7,7 @@ node_modules
 .env.production.local
 
 # Build outputs
-/build
+# /build  # Commentato per GitHub Pages deployment
 /dist
 
 # IDE
